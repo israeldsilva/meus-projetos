@@ -1,0 +1,215 @@
+[
+  {
+    "id": "mesencefalo",
+    "nome": "Mesencéfalo",
+    "latim": "Mesencephalon",
+    "ingles": "Midbrain",
+    "divisao": "tronco",
+    "malhas": [{ "fma": "FMA61993nsn" }],
+    "funcao": "Conduz as vias motoras e sensitivas entre o prosencéfalo e as estruturas inferiores. Abriga os colículos superiores (reflexos visuais) e inferiores (reflexos auditivos), a substância negra e o núcleo rubro (controle motor), além dos núcleos dos nervos oculomotor (III) e troclear (IV).",
+    "irrigacao": "Ramos perfurantes das artérias cerebrais posteriores, da comunicante posterior e da porção distal da basilar.",
+    "relacoes": "Contínuo superiormente com o diencéfalo e inferiormente com a ponte. É atravessado pelo aqueduto cerebral, que o divide em tegmento (anterior) e teto (posterior, a lâmina quadrigêmea). Anteriormente projetam-se os pedúnculos cerebrais.",
+    "clinica": "A síndrome de Weber (lesão do pedúnculo cerebral) causa hemiplegia contralateral com paralisia do III nervo ipsilateral. A degeneração da substância negra é a base da doença de Parkinson. Na herniação do úncus, a compressão do III produz midríase ipsilateral — sinal de alarme."
+  },
+  {
+    "id": "ponte",
+    "nome": "Ponte",
+    "latim": "Pons",
+    "ingles": "Pons",
+    "divisao": "tronco",
+    "malhas": [{ "fma": "FMA67943" }],
+    "funcao": "Faz a ligação entre os hemisférios cerebelares pelos pedúnculos cerebelares médios e serve de passagem aos tratos corticoespinhais. Contém os núcleos dos nervos trigêmeo (V), abducente (VI), facial (VII) e vestibulococlear (VIII), além dos centros pneumotáxico e apnêustico da respiração.",
+    "irrigacao": "Artéria basilar e seus ramos pontinos; contribuição das artérias cerebelares superior e ântero-inferior (AICA).",
+    "relacoes": "Situa-se entre o mesencéfalo (acima) e o bulbo (abaixo). Posteriormente forma a metade superior do assoalho do IV ventrículo, que a separa do cerebelo.",
+    "clinica": "O infarto pontino ventral extenso produz a síndrome do encarceramento (locked-in): tetraplegia e anartria com consciência preservada, restando apenas o olhar vertical. A mielinólise pontina central resulta da correção rápida demais de hiponatremia."
+  },
+  {
+    "id": "bulbo",
+    "nome": "Bulbo",
+    "latim": "Medulla oblongata",
+    "ingles": "Medulla oblongata",
+    "divisao": "tronco",
+    "malhas": [{ "fma": "FMA62004" }],
+    "funcao": "Abriga os centros autonômicos vitais — cardiovascular, respiratório, do vômito, da tosse e da deglutição. É o local da decussação das pirâmides, onde os tratos corticoespinhais cruzam a linha média, e contém os núcleos dos nervos glossofaríngeo (IX), vago (X), acessório (XI) e hipoglosso (XII).",
+    "irrigacao": "Artérias vertebrais, artéria espinhal anterior, artérias espinhais posteriores e artéria cerebelar póstero-inferior (PICA).",
+    "relacoes": "Continua-se com a medula espinhal ao nível do forame magno e com a ponte superiormente. Posteriormente forma a metade inferior do assoalho do IV ventrículo.",
+    "clinica": "A oclusão da PICA causa a síndrome de Wallenberg (bulbar lateral): perda sensitiva térmica e dolorosa na face ipsilateral e no corpo contralateral, disfagia, rouquidão, síndrome de Horner e ataxia. Lesão bulbar bilateral é rapidamente fatal por parada respiratória."
+  },
+  {
+    "id": "cerebelo",
+    "nome": "Cerebelo",
+    "latim": "Cerebellum",
+    "ingles": "Cerebellum",
+    "divisao": "cerebelo",
+    "malhas": [{ "fma": "FMA67944" }],
+    "funcao": "Coordena o movimento: ajuste fino, precisão e sincronia da atividade motora, manutenção do equilíbrio e do tônus muscular, e aprendizado motor. Não inicia o movimento — corrige-o em tempo real comparando a intenção com a execução.",
+    "irrigacao": "Artéria cerebelar superior (SCA), artéria cerebelar ântero-inferior (AICA) e artéria cerebelar póstero-inferior (PICA).",
+    "relacoes": "Ocupa a fossa craniana posterior, abaixo do tentório do cerebelo e posteriormente à ponte e ao bulbo, dos quais se separa pelo IV ventrículo. Liga-se ao tronco encefálico por três pares de pedúnculos cerebelares.",
+    "clinica": "A lesão produz ataxia, dismetria, disdiadococinesia, tremor de intenção, nistagmo e fala escandida. Ponto de prova: os sinais são ipsilaterais à lesão, porque as vias cruzam duas vezes."
+  },
+  {
+    "id": "talamo",
+    "nome": "Tálamo",
+    "latim": "Thalamus",
+    "ingles": "Thalamus",
+    "divisao": "diencefalo",
+    "malhas": [
+      { "fma": "FMA258714", "lado": "direito" },
+      { "fma": "FMA258716", "lado": "esquerdo" }
+    ],
+    "funcao": "Estação retransmissora de praticamente toda a informação sensitiva destinada ao córtex — o olfato é a exceção clássica. Participa também dos circuitos motores, da regulação da atenção, do nível de consciência e da memória.",
+    "irrigacao": "Ramos perfurantes da artéria cerebral posterior e da comunicante posterior: artérias talamoperfurantes e talamogeniculadas.",
+    "relacoes": "Os dois tálamos formam as paredes laterais do III ventrículo, frequentemente unidos pela aderência intertalâmica. Abaixo do corpo do ventrículo lateral e do fórnix; lateralmente é limitado pela cápsula interna.",
+    "clinica": "A síndrome talâmica de Déjerine-Roussy cursa com perda sensitiva contralateral seguida, semanas depois, de dor central intensa e refratária no hemicorpo afetado."
+  },
+  {
+    "id": "hipotalamo",
+    "nome": "Hipotálamo",
+    "latim": "Hypothalamus",
+    "ingles": "Hypothalamus",
+    "divisao": "diencefalo",
+    "malhas": [{ "fma": "FMA62008nsn" }],
+    "funcao": "Centro integrador da homeostase: termorregulação, fome, sede, ciclo sono-vigília, ritmo circadiano e comportamento emocional. Comanda o sistema endócrino através da hipófise e é o principal regulador do sistema nervoso autônomo.",
+    "irrigacao": "Ramos perfurantes do círculo arterial do cérebro (polígono de Willis), sobretudo da artéria comunicante anterior e das cerebrais anterior e posterior.",
+    "relacoes": "Forma o assoalho e a porção inferior das paredes laterais do III ventrículo. Separa-se do tálamo pelo sulco hipotalâmico e conecta-se à hipófise pelo infundíbulo.",
+    "clinica": "Lesões causam diabetes insípido (déficit de ADH), distúrbios da termorregulação, hiperfagia com obesidade e alterações graves do ciclo sono-vigília."
+  },
+  {
+    "id": "nucleo-caudado",
+    "nome": "Núcleo caudado",
+    "latim": "Nucleus caudatus",
+    "ingles": "Caudate nucleus",
+    "divisao": "nucleos-base",
+    "malhas": [
+      { "fma": "FMA72826", "lado": "direito" },
+      { "fma": "FMA72827", "lado": "esquerdo" }
+    ],
+    "funcao": "Com o putâmen forma o corpo estriado, porta de entrada dos núcleos da base. Participa do circuito motor que seleciona e inibe movimentos, e também de funções cognitivas, motivacionais e comportamentais.",
+    "irrigacao": "Artérias lenticuloestriadas (ramos da cerebral média) e artéria recorrente de Heubner (ramo da cerebral anterior).",
+    "relacoes": "Acompanha toda a curvatura do ventrículo lateral, formando sua parede lateral — daí a divisão em cabeça, corpo e cauda. É separado do putâmen pela cápsula interna, à qual se une por pontes de substância cinzenta.",
+    "clinica": "A atrofia do caudado é a marca da doença de Huntington, visível na neuroimagem como alargamento dos cornos frontais dos ventrículos laterais. Clinicamente: coreia, alterações de comportamento e demência."
+  },
+  {
+    "id": "putamen",
+    "nome": "Putâmen",
+    "latim": "Putamen",
+    "ingles": "Putamen",
+    "divisao": "nucleos-base",
+    "malhas": [
+      { "fma": "FMA72828", "lado": "direito" },
+      { "fma": "FMA72829", "lado": "esquerdo" }
+    ],
+    "funcao": "Maior componente do núcleo lentiforme e, junto com o caudado, forma o corpo estriado. Recebe densas aferências do córtex motor e participa do controle do movimento e do aprendizado de hábitos e sequências motoras.",
+    "irrigacao": "Artérias lenticuloestriadas, ramos perfurantes da artéria cerebral média.",
+    "relacoes": "Lateral ao globo pálido (com o qual forma o núcleo lentiforme) e medial à cápsula externa e ao claustro. Separado do núcleo caudado pelo ramo anterior da cápsula interna.",
+    "clinica": "Sítio mais frequente da hemorragia intraparenquimatosa hipertensiva, por ruptura das artérias lenticuloestriadas — as chamadas artérias da hemorragia cerebral."
+  },
+  {
+    "id": "globo-palido",
+    "nome": "Globo pálido",
+    "latim": "Globus pallidus",
+    "ingles": "Globus pallidus",
+    "divisao": "nucleos-base",
+    "malhas": [
+      { "fma": "FMA72830", "lado": "direito" },
+      { "fma": "FMA72831", "lado": "esquerdo" }
+    ],
+    "funcao": "Principal via de saída dos núcleos da base. Seus segmentos interno e externo modulam o tálamo e, por meio dele, o córtex motor — inibindo tonicamente movimentos indesejados e liberando os desejados.",
+    "irrigacao": "Artéria coroidea anterior e artérias lenticuloestriadas.",
+    "relacoes": "Medial ao putâmen, com quem forma o núcleo lentiforme, e lateral à cápsula interna. Sua cor mais clara, que lhe dá o nome, vem da densa mielinização.",
+    "clinica": "Alvo consagrado da estimulação cerebral profunda (DBS) na doença de Parkinson e na distonia. É seletivamente vulnerável à intoxicação por monóxido de carbono e a lesões hipóxico-isquêmicas."
+  },
+  {
+    "id": "hipocampo",
+    "nome": "Hipocampo",
+    "latim": "Hippocampus",
+    "ingles": "Hippocampus",
+    "divisao": "limbico",
+    "malhas": [
+      { "fma": "FMA72713", "lado": "direito" },
+      { "fma": "FMA72714", "lado": "esquerdo" }
+    ],
+    "funcao": "Essencial à formação de novas memórias declarativas e à sua consolidação em memória de longo prazo. Participa também da navegação e da memória espacial. Componente central do sistema límbico.",
+    "irrigacao": "Artéria coroidea anterior e ramos hipocampais da artéria cerebral posterior.",
+    "relacoes": "Forma o assoalho do corno temporal do ventrículo lateral, medialmente ao giro para-hipocampal. Suas fibras eferentes constituem o fórnix, que se projeta aos corpos mamilares.",
+    "clinica": "É a estrutura acometida mais precocemente na doença de Alzheimer. A esclerose hipocampal é a causa mais comum de epilepsia do lobo temporal medial. Lesão bilateral produz amnésia anterógrada — o caso H.M."
+  },
+  {
+    "id": "amigdala",
+    "nome": "Corpo amigdaloide",
+    "latim": "Corpus amygdaloideum",
+    "ingles": "Amygdala",
+    "divisao": "limbico",
+    "malhas": [
+      { "fma": "FMA72832", "lado": "direito" },
+      { "fma": "FMA72833", "lado": "esquerdo" }
+    ],
+    "funcao": "Núcleo do processamento emocional, sobretudo do medo e da ansiedade. Atribui valor emocional a estímulos e memórias e dispara as respostas autonômicas e endócrinas de defesa.",
+    "irrigacao": "Artéria coroidea anterior e ramos da artéria cerebral média.",
+    "relacoes": "Situa-se no polo anterior do corno temporal do ventrículo lateral, anterior e superiormente à cabeça do hipocampo, com a qual é contínua. Relaciona-se com o úncus do giro para-hipocampal.",
+    "clinica": "A lesão bilateral causa a síndrome de Klüver-Bucy: docilidade excessiva, hiperoralidade, hipersexualidade e agnosia visual. A hiperatividade amigdaliana associa-se aos transtornos de ansiedade e ao estresse pós-traumático."
+  },
+  {
+    "id": "corpo-caloso",
+    "nome": "Corpo caloso",
+    "latim": "Corpus callosum",
+    "ingles": "Corpus callosum",
+    "divisao": "substancia-branca",
+    "malhas": [{ "fma": "FMA86464" }],
+    "funcao": "Maior comissura do encéfalo, com cerca de 200 milhões de fibras conectando áreas homólogas dos dois hemisférios. É a via da transferência inter-hemisférica de informação sensitiva, motora e cognitiva.",
+    "irrigacao": "Artéria pericalosa, ramo da artéria cerebral anterior; o esplênio recebe também ramos da artéria cerebral posterior.",
+    "relacoes": "Forma o assoalho da fissura longitudinal do cérebro e o teto dos ventrículos laterais. Divide-se, de anterior para posterior, em rostro, joelho, tronco e esplênio. Abaixo dele situam-se o septo pelúcido e o fórnix.",
+    "clinica": "A agenesia do corpo caloso pode ser assintomática ou associar-se a síndromes malformativas. A calosotomia para epilepsia refratária produz a síndrome de desconexão inter-hemisférica, o clássico 'cérebro dividido'."
+  },
+  {
+    "id": "ventriculo-lateral",
+    "nome": "Ventrículo lateral",
+    "latim": "Ventriculus lateralis",
+    "ingles": "Lateral ventricle",
+    "divisao": "ventriculos",
+    "malhas": [
+      { "fma": "FMA78449", "lado": "direito" },
+      { "fma": "FMA78450", "lado": "esquerdo" }
+    ],
+    "funcao": "Cavidades onde o plexo corióide produz o líquido cerebrospinal. O LCR amortece mecanicamente o encéfalo, remove metabólitos e mantém a homeostase do meio extracelular nervoso.",
+    "irrigacao": "O plexo corióide que os reveste é irrigado pelas artérias coroideas anterior e posteriores.",
+    "relacoes": "Um em cada hemisfério, com corno frontal, corpo, átrio, corno occipital e corno temporal. Comunicam-se com o III ventrículo pelos forames interventriculares de Monro. São contornados pelo núcleo caudado e cobertos pelo corpo caloso.",
+    "clinica": "A dilatação ventricular é o achado central da hidrocefalia. No prematuro, a hemorragia intraventricular origina-se da matriz germinativa. Na atrofia cortical, a dilatação é ex vacuo — passiva, sem hipertensão."
+  },
+  {
+    "id": "terceiro-ventriculo",
+    "nome": "Terceiro ventrículo",
+    "latim": "Ventriculus tertius",
+    "ingles": "Third ventricle",
+    "divisao": "ventriculos",
+    "malhas": [{ "fma": "FMA78454" }],
+    "funcao": "Cavidade mediana estreita que recebe o líquido cerebrospinal dos ventrículos laterais e o conduz ao aqueduto cerebral, rumo ao IV ventrículo.",
+    "irrigacao": "Seu plexo corióide é irrigado por ramos das artérias coroideas posteriores.",
+    "relacoes": "Suas paredes laterais são formadas pelos tálamos e pela porção superior do hipotálamo; o assoalho, pelo hipotálamo. Comunica-se superiormente com os ventrículos laterais pelos forames de Monro e inferiormente com o IV ventrículo pelo aqueduto cerebral.",
+    "clinica": "Cistos coloides do III ventrículo e tumores da região pineal obstruem o fluxo e podem causar hidrocefalia obstrutiva aguda, com risco de morte súbita."
+  },
+  {
+    "id": "hipofise",
+    "nome": "Hipófise",
+    "latim": "Hypophysis",
+    "ingles": "Pituitary gland",
+    "divisao": "diencefalo",
+    "malhas": [{ "fma": "FMA13889" }],
+    "funcao": "Glândula-mestra do sistema endócrino. A adeno-hipófise secreta GH, ACTH, TSH, FSH, LH e prolactina; a neuro-hipófise armazena e libera o ADH e a ocitocina, produzidos no hipotálamo.",
+    "irrigacao": "Artérias hipofisárias superior e inferior, ramos da artéria carótida interna, e o sistema porta hipotálamo-hipofisário, que traz os hormônios reguladores do hipotálamo.",
+    "relacoes": "Alojada na sela túrcica do osso esfenoide e ligada ao hipotálamo pelo infundíbulo. Acima dela cruza o quiasma óptico; lateralmente estão os seios cavernosos, com a carótida interna e os nervos III, IV, V1, V2 e VI.",
+    "clinica": "O adenoma hipofisário que cresce para cima comprime o quiasma óptico e causa hemianopsia bitemporal — a relação anatômica que explica o sinal. Também: apoplexia hipofisária e síndrome de Sheehan (necrose isquêmica pós-parto)."
+  },
+  {
+    "id": "corpo-pineal",
+    "nome": "Corpo pineal",
+    "latim": "Corpus pineale",
+    "ingles": "Pineal body",
+    "divisao": "diencefalo",
+    "malhas": [{ "fma": "FMA62033" }],
+    "funcao": "Secreta melatonina em resposta à ausência de luz, regulando o ritmo circadiano e o ciclo sono-vigília. Recebe informação luminosa por uma via que parte da retina e passa pelo núcleo supraquiasmático.",
+    "irrigacao": "Ramos da artéria coroidea posterior medial.",
+    "relacoes": "Compõe o epitálamo, projetando-se da parede posterior do III ventrículo. Situa-se acima dos colículos superiores e posteriormente ao esplênio do corpo caloso.",
+    "clinica": "Calcifica-se com a idade, servindo de marco radiológico da linha média — seu desvio sugere efeito de massa. O pinealoma comprime o teto do mesencéfalo e causa a síndrome de Parinaud: paralisia do olhar vertical para cima."
+  }
+]
