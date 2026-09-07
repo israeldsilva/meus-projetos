@@ -129,6 +129,7 @@ type Controles = {
   getPolarAngle: () => number;
   setAzimuthalAngle: (a: number) => void;
   setPolarAngle: (a: number) => void;
+  target: THREE.Vector3;
   update: () => void;
 };
 
@@ -181,7 +182,75 @@ function AnimarCamera({ controles }: { controles: React.RefObject<Controles | nu
   return null;
 }
 
-function Encefalo() {
+/**
+ * Cores do modo estudo.
+ *
+ * Durante a prova TODAS as estruturas ficam de um cinza uniforme e só a
+ * perguntada recebe cor. É como funciona a prova prática de anatomia: um
+ * espécime dissecado não tem código de cores — é todo da mesma cor, e se
+ * identifica a peça marcada pela forma e pela posição.
+ *
+ * Isso resolve de uma vez dois problemas. A cor da divisão deixaria de ser uma
+ * pista, e as estruturas voltam a ser OPACAS: dezenas de superfícies
+ * translúcidas sobrepostas somavam uma névoa leitosa em que o destaque
+ * simplesmente sumia.
+ */
+const NEUTRO_ESTUDO = "#7E838D";
+const DESTAQUE_ESTUDO = "#F0A93B";
+
+type Caixas = React.RefObject<Map<string, THREE.Box3>>;
+
+/**
+ * Aponta a câmera para a estrutura perguntada.
+ *
+ * Sem isso o estudo seria injusto: a habênula tem 384 triângulos e o corpo
+ * pineal 2.536 — enquadrados junto com o encéfalo inteiro, virariam pontos de
+ * poucos pixels. O salto é imediato, e não animado, porque entre duas perguntas
+ * quaisquer a interpolação só desorientaria.
+ */
+function Enquadrar({
+  caixas,
+  controles,
+}: {
+  caixas: Caixas;
+  controles: React.RefObject<Controles | null>;
+}) {
+  const alvoEstudo = useCena((s) => s.alvoEstudo);
+  const modo = useCena((s) => s.modo);
+  const { camera } = useThree();
+
+  useEffect(() => {
+    const ctrl = controles.current;
+    if (!ctrl) return;
+
+    const caixa = alvoEstudo ? caixas.current?.get(alvoEstudo) : null;
+
+    if (!caixa || modo === "atlas") {
+      // Fora do estudo a órbita volta ao centro do encéfalo.
+      ctrl.target.set(0, 0, 0);
+      ctrl.update();
+      return;
+    }
+
+    const centro = caixa.getCenter(new THREE.Vector3());
+    const raio = caixa.getBoundingSphere(new THREE.Sphere()).radius;
+
+    // O piso é o que mais importa. Sem ele, enquadrar o aqueduto cerebral —
+    // que tem alguns milímetros — colocaria a câmera DENTRO do encéfalo, e a
+    // pergunta viraria uma sopa translúcida sem referência nenhuma. O teto
+    // evita o oposto: enquadrar o córtex e voltar à vista do atlas inteiro.
+    const distancia = Math.min(Math.max(raio * 6, 1.7), 3.4);
+    const direcao = camera.position.clone().sub(ctrl.target).normalize();
+
+    ctrl.target.copy(centro);
+    camera.position.copy(centro).add(direcao.multiplyScalar(distancia));
+    ctrl.update();
+  }, [alvoEstudo, modo, caixas, controles, camera]);
+
+  return null;
+}
+
+function Encefalo({ caixas }: { caixas: Caixas }) {
   const { scene } = useGLTF(MODELO, DRACO);
   const selecionada = useCena((s) => s.selecionada);
   const sobRotulo = useCena((s) => s.sobRotulo);
@@ -189,8 +258,14 @@ function Encefalo() {
   const isolada = useCena((s) => s.isolada);
   const opacidadeCortex = useCena((s) => s.opacidadeCortex);
   const cortes = useCena((s) => s.cortes);
+  const modo = useCena((s) => s.modo);
+  const alvoEstudo = useCena((s) => s.alvoEstudo);
   const selecionar = useCena((s) => s.selecionar);
   const apontar = useCena((s) => s.apontar);
+
+  const estudando = modo !== "atlas";
+  const alvo = alvoEstudo ? porId.get(alvoEstudo) : undefined;
+  const alvoEhEnvoltorio = alvo ? ehEnvoltorio(alvo) : false;
 
   const cortando =
     cortes.sagital.ativo || cortes.coronal.ativo || cortes.axial.ativo;
@@ -199,7 +274,12 @@ function Encefalo() {
   // para não contaminar outras montagens do componente.
   const { modelo, malhas } = useMemo(() => {
     const modelo = scene.clone(true);
+    // As caixas usam matrixWorld, que o clone ainda não calculou por não estar
+    // na cena; sem isto os limites sairiam na posição errada.
+    modelo.updateMatrixWorld(true);
+
     const malhas: { malha: THREE.Mesh; estruturaId: string }[] = [];
+    const limites = new Map<string, THREE.Box3>();
 
     modelo.traverse((objeto) => {
       const malha = objeto as THREE.Mesh;
@@ -214,10 +294,19 @@ function Encefalo() {
         metalness: 0.04,
       });
       malhas.push({ malha, estruturaId: estrutura.id });
+
+      // Limites por ESTRUTURA, unindo as malhas dos dois lados: enquadrar só o
+      // tálamo direito deixaria o esquerdo fora de quadro, e a pergunta é
+      // sobre a estrutura, não sobre um dos lados.
+      malha.geometry.computeBoundingBox();
+      const caixa = malha.geometry.boundingBox!.clone().applyMatrix4(malha.matrixWorld);
+      const atual = limites.get(estrutura.id);
+      limites.set(estrutura.id, atual ? atual.union(caixa) : caixa);
     });
 
+    caixas.current = limites;
     return { modelo, malhas };
-  }, [scene]);
+  }, [scene, caixas]);
 
   // Visibilidade e destaque são aplicados de forma imperativa: mexer no material
   // existente é muito mais barato que recriar a árvore React a cada clique.
@@ -228,7 +317,14 @@ function Encefalo() {
       const estrutura = porId.get(estruturaId);
       if (!estrutura) continue;
 
-      malha.visible = estaVisivel(estruturaId, ocultas, isolada);
+      // Quando a pergunta é sobre uma estrutura profunda, o envoltório
+      // cortical sai de cena por inteiro em vez de ficar translúcido: é a
+      // dissecção que um exame prático faria para expor o que está sendo
+      // perguntado. Se a pergunta é sobre o próprio córtex, ele fica.
+      const eEnvoltorio = ehEnvoltorio(estrutura);
+      malha.visible = estudando
+        ? alvoEhEnvoltorio || !eEnvoltorio
+        : estaVisivel(estruturaId, ocultas, isolada);
 
       const material = malha.material as THREE.MeshStandardMaterial;
       const eSelecionada = selecionada === estruturaId;
@@ -244,8 +340,11 @@ function Encefalo() {
       // ainda soma quase opaco, escondendo justamente as estruturas profundas
       // que mais interessam ver.
       const recuada = haSelecao && !destacada;
-      const opacidade =
-        opacidadeBase(estrutura, opacidadeCortex) * (recuada ? 0.06 : 1);
+
+      const eAlvo = estudando && alvoEstudo === estruturaId;
+      const opacidade = estudando
+        ? 1
+        : opacidadeBase(estrutura, opacidadeCortex) * (recuada ? 0.06 : 1);
 
       material.opacity = opacidade;
       material.depthWrite = opacidade > 0.95;
@@ -272,20 +371,57 @@ function Encefalo() {
         material.transparent = precisaBlend;
         material.needsUpdate = true;
       }
-      material.emissive.set(destacada ? DIVISOES[estrutura.divisao].cor : "#000000");
-      material.emissiveIntensity = eSelecionada ? 0.5 : eApontada ? 0.25 : 0;
+      // Com tudo opaco, uma estrutura profunda como o aqueduto cerebral ficaria
+      // escondida dentro do mesencéfalo e a pergunta seria impossível. O alvo
+      // então ignora o teste de profundidade e desenha por cima de tudo, como o
+      // pino que marca a peça num exame prático. A forma continua legível
+      // porque a iluminação é preservada — só a oclusão é que não se aplica.
+      material.depthTest = !eAlvo;
+      malha.renderOrder = eAlvo ? 999 : 0;
+
+      const corDivisao = DIVISOES[estrutura.divisao].cor;
+      material.color.set(
+        estudando ? (eAlvo ? DESTAQUE_ESTUDO : NEUTRO_ESTUDO) : corDivisao,
+      );
+      material.emissive.set(
+        eAlvo ? DESTAQUE_ESTUDO : destacada && !estudando ? corDivisao : "#000000",
+      );
+      material.emissiveIntensity = eAlvo
+        ? 0.35
+        : estudando
+          ? 0
+          : eSelecionada
+            ? 0.5
+            : eApontada
+              ? 0.25
+              : 0;
     }
-  }, [malhas, selecionada, sobRotulo, ocultas, isolada, opacidadeCortex, cortando]);
+  }, [
+    malhas,
+    selecionada,
+    sobRotulo,
+    ocultas,
+    isolada,
+    opacidadeCortex,
+    cortando,
+    estudando,
+    alvoEstudo,
+    alvoEhEnvoltorio,
+  ]);
 
   return (
     <primitive
       object={modelo}
+      // Durante o estudo, clicar ou passar o cursor abriria a ficha e o rótulo
+      // — ou seja, entregaria a resposta da pergunta na tela.
       onClick={(evento: { stopPropagation: () => void; object: THREE.Object3D }) => {
+        if (estudando) return;
         evento.stopPropagation();
         const estrutura = porFma.get(evento.object.name);
         if (estrutura) selecionar(estrutura.id);
       }}
       onPointerOver={(evento: { stopPropagation: () => void; object: THREE.Object3D }) => {
+        if (estudando) return;
         evento.stopPropagation();
         apontar(porFma.get(evento.object.name)?.id ?? null);
       }}
@@ -319,6 +455,7 @@ export default function Viewer3D() {
   const selecionar = useCena((s) => s.selecionar);
   const sobRotulo = useCena((s) => s.sobRotulo);
   const controles = useRef<Controles | null>(null);
+  const caixas = useRef<Map<string, THREE.Box3>>(new Map());
 
   useEffect(() => {
     document.body.style.cursor = sobRotulo ? "pointer" : "default";
@@ -346,10 +483,11 @@ export default function Viewer3D() {
         <directionalLight position={[0, -3, 2]} intensity={0.35} color="#d9a68f" />
 
         <Suspense fallback={null}>
-          <Encefalo />
+          <Encefalo caixas={caixas} />
         </Suspense>
 
         <Cortes />
+        <Enquadrar caixas={caixas} controles={controles} />
         <AnimarCamera controles={controles} />
         <OrbitControls
           ref={controles as never}

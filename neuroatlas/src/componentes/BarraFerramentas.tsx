@@ -79,6 +79,7 @@ export default function BarraFerramentas() {
   const alternarRaioX = useCena((s) => s.alternarRaioX);
   const cortes = useCena((s) => s.cortes);
   const limparCortes = useCena((s) => s.limparCortes);
+  const entrarModo = useCena((s) => s.entrarModo);
 
   const [aberto, setAberto] = useState(false);
   const raioXAtivo = opacidadeCortex < 1;
@@ -153,6 +154,14 @@ export default function BarraFerramentas() {
           }`}
         >
           Raio-X
+        </button>
+
+        <button
+          onClick={() => entrarModo("identificacao")}
+          title="Testar o reconhecimento das estruturas no 3D"
+          className="rounded-md px-2.5 py-1.5 text-[11.5px] text-texto-suave transition-colors hover:bg-white/[0.06] hover:text-texto"
+        >
+          Estudar
         </button>
 
         <button

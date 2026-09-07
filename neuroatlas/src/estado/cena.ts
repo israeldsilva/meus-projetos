@@ -30,6 +30,8 @@ export const CORTES_INICIAIS: Record<EixoCorte, Corte> = {
   axial: { ativo: false, posicao: 0, invertido: false },
 };
 
+export type Modo = "atlas" | "identificacao" | "flashcards";
+
 type EstadoCena = {
   /** Id da estrutura selecionada, ou null. */
   selecionada: string | null;
@@ -63,6 +65,13 @@ type EstadoCena = {
 
   cortes: Record<EixoCorte, Corte>;
 
+  modo: Modo;
+  /**
+   * Estrutura que a sessão de estudo está mostrando. No 3D ela é destacada em
+   * cor NEUTRA: usar a cor da divisão entregaria metade da resposta.
+   */
+  alvoEstudo: string | null;
+
   selecionar: (id: string | null) => void;
   apontar: (id: string | null, origem?: "3d" | "arvore") => void;
   alternarVisibilidade: (id: string) => void;
@@ -74,6 +83,8 @@ type EstadoCena = {
   alternarRaioX: () => void;
   definirCorte: (eixo: EixoCorte, mudanca: Partial<Corte>) => void;
   limparCortes: () => void;
+  entrarModo: (modo: Modo) => void;
+  definirAlvoEstudo: (id: string | null) => void;
 };
 
 /** Opacidade do córtex no raio-X: baixa o bastante para revelar o interior. */
@@ -89,6 +100,8 @@ export const useCena = create<EstadoCena>((set) => ({
   buscaAberta: false,
   opacidadeCortex: 1,
   cortes: CORTES_INICIAIS,
+  modo: "atlas",
+  alvoEstudo: null,
 
   selecionar: (id) => set({ selecionada: id }),
 
@@ -126,6 +139,23 @@ export const useCena = create<EstadoCena>((set) => ({
     set((s) => ({ cortes: { ...s.cortes, [eixo]: { ...s.cortes[eixo], ...mudanca } } })),
 
   limparCortes: () => set({ cortes: CORTES_INICIAIS }),
+
+  // Entrar ou sair do estudo limpa o que atrapalharia: seleção e rótulo
+  // revelariam a resposta, e cortes herdados da exploração esconderiam a
+  // própria estrutura sendo perguntada.
+  entrarModo: (modo) =>
+    set({
+      modo,
+      alvoEstudo: null,
+      selecionada: null,
+      sobRotulo: null,
+      isolada: null,
+      ocultas: new Set(),
+      cortes: CORTES_INICIAIS,
+      opacidadeCortex: modo === "atlas" ? 1 : RAIO_X,
+    }),
+
+  definirAlvoEstudo: (alvoEstudo) => set({ alvoEstudo }),
 }));
 
 /** Uma estrutura aparece se não está oculta e nenhum isolamento a exclui. */

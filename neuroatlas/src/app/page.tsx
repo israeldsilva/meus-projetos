@@ -6,6 +6,7 @@ import ArvoreAnatomica from "@/componentes/ArvoreAnatomica";
 import Busca from "@/componentes/Busca";
 import FichaEstrutura from "@/componentes/FichaEstrutura";
 import BarraFerramentas from "@/componentes/BarraFerramentas";
+import ModoEstudo from "@/componentes/ModoEstudo";
 import { DIVISOES, porId } from "@/dados/estruturas";
 import { useCena } from "@/estado/cena";
 
@@ -43,14 +44,32 @@ function RotuloFlutuante() {
 }
 
 export default function Pagina() {
+  const estudando = useCena((s) => s.modo) !== "atlas";
+
   return (
     <main className="relative h-screen w-screen overflow-hidden">
       <Viewer3D />
-      <ArvoreAnatomica />
-      <FichaEstrutura />
-      <BarraFerramentas />
-      <RotuloFlutuante />
-      <Busca />
+
+      {/* Durante o estudo a árvore fica fora da tela: ela lista o nome e o
+          termo em latim de todas as estruturas, ou seja, é o gabarito da
+          pergunta. Com ela some também o crédito do acervo, reposto abaixo. */}
+      {estudando ? (
+        <>
+          <ModoEstudo />
+          <p className="pointer-events-none absolute bottom-4 left-4 z-10 max-w-[240px] text-[10px] leading-relaxed text-texto-fraco">
+            Modelos 3D derivados do BodyParts3D, © Database Center for Life Science ·
+            CC BY-SA 2.1 JP
+          </p>
+        </>
+      ) : (
+        <>
+          <ArvoreAnatomica />
+          <FichaEstrutura />
+          <BarraFerramentas />
+          <RotuloFlutuante />
+          <Busca />
+        </>
+      )}
     </main>
   );
 }

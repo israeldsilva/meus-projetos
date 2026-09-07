@@ -155,9 +155,15 @@ painel direito com a ficha da estrutura selecionada. Ambos recolhíveis.
 
 **Modo estudo** (Fase 4):
 
-- Identificação: destaca uma estrutura sem rótulo → "que estrutura é essa?"
-- Flashcards com **repetição espaçada** (algoritmo SM-2), progresso em `localStorage`
-- Trilhas temáticas: "vias motoras", "sistema límbico", "irrigação do encéfalo"
+- **Identificação**: reproduz o formato da prova prática. Todas as estruturas ficam de um
+  cinza uniforme — como um espécime dissecado, que não tem código de cores — e só a
+  perguntada recebe destaque. As alternativas erradas vêm da mesma divisão: distratores
+  de divisões diferentes tornariam a questão trivial por eliminação de categoria.
+- **Flashcards** com **repetição espaçada** (SM-2), progresso em `localStorage`.
+- **Escopo por divisão**, em vez das trilhas temáticas previstas no plano original.
+  Trilhas como "vias motoras" exigiriam agrupar estruturas por critério que eu
+  inventaria; o escopo por divisão usa a ontologia real. Se as trilhas fizerem falta, é
+  ela quem deve definir quais são.
 
 ---
 
@@ -169,7 +175,7 @@ painel direito com a ficha da estrutura selecionada. Ambos recolhíveis.
 | **1** | **Fatia vertical:** pipeline + viewer 3D + árvore + fichas das estruturas-chave | **App real rodando** — gira, clica, lê a ficha |
 | **2** | Acervo completo (62 estruturas, 100 malhas), árvore por lobo, busca ⌘K, presets de câmera | Atlas navegável completo |
 | **3** | Planos de corte axial/coronal/sagital, modo raio-X, controle de opacidade | Ferramenta de exploração espacial |
-| **4** | Modo estudo: quiz, flashcards SM-2, trilhas, painel de progresso | Ferramenta de estudo ativo |
+| **4** | Modo estudo: identificação no 3D, flashcards SM-2, progresso por divisão | Ferramenta de estudo ativo |
 | **5** | Medula espinhal e nervos cranianos (fonte a definir) | Cobertura da matéria completa |
 | **6** | Polimento, PWA offline, deploy na Vercel | Publicado e usável offline |
 

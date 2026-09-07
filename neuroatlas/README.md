@@ -28,7 +28,7 @@ completo, a arquitetura e as fases de entrega.
 | 1 | Fatia vertical: pipeline + viewer 3D + árvore + fichas | ✅ |
 | 2 | Acervo completo (62 estruturas), busca ⌘K, presets de câmera | ✅ |
 | 3 | Planos de corte, modo raio-X, controle de opacidade | ✅ |
-| 4 | Modo estudo: quiz, flashcards, trilhas | ⏳ |
+| 4 | Modo estudo: identificação no 3D, flashcards, progresso | ✅ |
 | 5 | Medula espinhal e nervos cranianos | ⏳ |
 | 6 | Polimento, PWA offline, deploy | ⏳ |
 

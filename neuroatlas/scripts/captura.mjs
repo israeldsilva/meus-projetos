@@ -59,6 +59,26 @@ if (process.env.CLICAR) {
   console.log("clicado:", process.env.CLICAR);
 }
 
+// ESTUDAR=1 entra no modo estudo; ESTUDAR=cartoes abre a aba de flashcards.
+// RESPONDER=1 clica na primeira alternativa; VERSO=1 revela o cartão.
+if (process.env.ESTUDAR) {
+  await pagina.getByRole("button", { name: "Estudar" }).click();
+  await pagina.waitForTimeout(2500);
+  if (process.env.ESTUDAR === "cartoes") {
+    await pagina.getByRole("button", { name: "Cartões" }).click();
+    await pagina.waitForTimeout(2500);
+  }
+  if (process.env.VERSO) {
+    await pagina.getByRole("button", { name: "Mostrar resposta" }).click();
+    await pagina.waitForTimeout(1200);
+  }
+  if (process.env.RESPONDER) {
+    await pagina.locator("aside button").filter({ hasText: /^[A-ZÁÉÍÓÚÂÊÔÃÕÇ]/ }).nth(2).click();
+    await pagina.waitForTimeout(1500);
+  }
+  console.log("estudo:", process.env.ESTUDAR);
+}
+
 // RAIOX=1 torna o córtex translúcido.
 if (process.env.RAIOX) {
   await pagina.getByRole("button", { name: "Raio-X" }).click();
