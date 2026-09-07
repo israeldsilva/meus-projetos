@@ -27,7 +27,7 @@ completo, a arquitetura e as fases de entrega.
 | 0 | Plano documentado e versionado | ✅ |
 | 1 | Fatia vertical: pipeline + viewer 3D + árvore + fichas | ✅ |
 | 2 | Acervo completo (62 estruturas), busca ⌘K, presets de câmera | ✅ |
-| 3 | Planos de corte, modo raio-X, isolamento | ⏳ |
+| 3 | Planos de corte, modo raio-X, controle de opacidade | ✅ |
 | 4 | Modo estudo: quiz, flashcards, trilhas | ⏳ |
 | 5 | Medula espinhal e nervos cranianos | ⏳ |
 | 6 | Polimento, PWA offline, deploy | ⏳ |
@@ -54,6 +54,8 @@ Verificação visual, com o servidor rodando:
 ```bash
 node scripts/captura.mjs tela.png
 CLICAR="Tálamo" ISOLAR=1 node scripts/captura.mjs isolado.png
+CORTE="Sagital" VISTA="Lateral D" node scripts/captura.mjs mediossagital.png
+RAIOX=1 CORTE="Coronal" VISTA="Posterior" node scripts/captura.mjs coronal.png
 ```
 
 ## Documentação

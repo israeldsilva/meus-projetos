@@ -168,7 +168,7 @@ painel direito com a ficha da estrutura selecionada. Ambos recolhíveis.
 | **0** | Plano documentado em `docs/`, commitado e enviado ao GitHub | Plano versionado |
 | **1** | **Fatia vertical:** pipeline + viewer 3D + árvore + fichas das estruturas-chave | **App real rodando** — gira, clica, lê a ficha |
 | **2** | Acervo completo (62 estruturas, 100 malhas), árvore por lobo, busca ⌘K, presets de câmera | Atlas navegável completo |
-| **3** | Planos de corte, modo raio-X, isolamento, controle de opacidade | Ferramenta de exploração espacial |
+| **3** | Planos de corte axial/coronal/sagital, modo raio-X, controle de opacidade | Ferramenta de exploração espacial |
 | **4** | Modo estudo: quiz, flashcards SM-2, trilhas, painel de progresso | Ferramenta de estudo ativo |
 | **5** | Medula espinhal e nervos cranianos (fonte a definir) | Cobertura da matéria completa |
 | **6** | Polimento, PWA offline, deploy na Vercel | Publicado e usável offline |
@@ -253,6 +253,19 @@ Isso não é burocracia: é a condição de uso legítimo de um acervo científi
    presumir que funcionou.
 
 Cada fase seguinte encerra com o app rodando e uma captura de tela do estado novo.
+
+---
+
+## Limitação conhecida dos cortes
+
+Os planos de corte **não têm tampa**. Cada estrutura é uma superfície fechada, e o
+plano a abre expondo o interior oco, em vez de uma face sólida como a de uma peça
+serrada de verdade. Tampar exigiria uma passagem extra com *stencil buffer* para cada
+estrutura e cada plano — cerca de trezentas chamadas de desenho a mais.
+
+Na prática o corte combinado com o raio-X lê bem, e as estruturas continuam
+identificáveis pela cor e pela posição. A tampa fica como polimento da Fase 6, se a
+falta dela realmente atrapalhar o estudo.
 
 ---
 

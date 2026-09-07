@@ -9,6 +9,27 @@ export type Vista =
   | "superior"
   | "inferior";
 
+/**
+ * Planos anatômicos de corte. Os nomes seguem a anatomia, não os eixos da
+ * cena: o corte sagital separa esquerda de direita, o coronal separa anterior
+ * de posterior e o axial separa superior de inferior.
+ */
+export type EixoCorte = "sagital" | "coronal" | "axial";
+
+export type Corte = {
+  ativo: boolean;
+  /** Posição do plano em unidades da cena; o encéfalo ocupa cerca de -1 a 1. */
+  posicao: number;
+  /** Inverte qual das duas metades permanece visível. */
+  invertido: boolean;
+};
+
+export const CORTES_INICIAIS: Record<EixoCorte, Corte> = {
+  sagital: { ativo: false, posicao: 0, invertido: false },
+  coronal: { ativo: false, posicao: 0, invertido: false },
+  axial: { ativo: false, posicao: 0, invertido: false },
+};
+
 type EstadoCena = {
   /** Id da estrutura selecionada, ou null. */
   selecionada: string | null;
@@ -33,6 +54,15 @@ type EstadoCena = {
   /** A paleta de busca está aberta. */
   buscaAberta: boolean;
 
+  /**
+   * Opacidade do envoltório cortical, de 0 a 1. Abaixo de 1 é o modo raio-X:
+   * o córtex fica translúcido e as estruturas profundas aparecem por dentro,
+   * sem perder a forma externa como referência.
+   */
+  opacidadeCortex: number;
+
+  cortes: Record<EixoCorte, Corte>;
+
   selecionar: (id: string | null) => void;
   apontar: (id: string | null, origem?: "3d" | "arvore") => void;
   alternarVisibilidade: (id: string) => void;
@@ -40,7 +70,14 @@ type EstadoCena = {
   mostrarTudo: () => void;
   irPara: (vista: Vista | null) => void;
   abrirBusca: (aberta: boolean) => void;
+  definirOpacidadeCortex: (valor: number) => void;
+  alternarRaioX: () => void;
+  definirCorte: (eixo: EixoCorte, mudanca: Partial<Corte>) => void;
+  limparCortes: () => void;
 };
+
+/** Opacidade do córtex no raio-X: baixa o bastante para revelar o interior. */
+const RAIO_X = 0.12;
 
 export const useCena = create<EstadoCena>((set) => ({
   selecionada: null,
@@ -50,6 +87,8 @@ export const useCena = create<EstadoCena>((set) => ({
   isolada: null,
   vista: null,
   buscaAberta: false,
+  opacidadeCortex: 1,
+  cortes: CORTES_INICIAIS,
 
   selecionar: (id) => set({ selecionada: id }),
 
@@ -76,6 +115,17 @@ export const useCena = create<EstadoCena>((set) => ({
   irPara: (vista) => set({ vista }),
 
   abrirBusca: (buscaAberta) => set({ buscaAberta }),
+
+  definirOpacidadeCortex: (valor) =>
+    set({ opacidadeCortex: Math.min(1, Math.max(0, valor)) }),
+
+  alternarRaioX: () =>
+    set((s) => ({ opacidadeCortex: s.opacidadeCortex < 1 ? 1 : RAIO_X })),
+
+  definirCorte: (eixo, mudanca) =>
+    set((s) => ({ cortes: { ...s.cortes, [eixo]: { ...s.cortes[eixo], ...mudanca } } })),
+
+  limparCortes: () => set({ cortes: CORTES_INICIAIS }),
 }));
 
 /** Uma estrutura aparece se não está oculta e nenhum isolamento a exclui. */

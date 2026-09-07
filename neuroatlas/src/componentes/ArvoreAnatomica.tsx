@@ -169,16 +169,31 @@ export default function ArvoreAnatomica() {
         })}
       </div>
 
-      {alterado && (
-        <footer className="shrink-0 border-t border-borda p-2">
+      <footer className="shrink-0 border-t border-borda p-2">
+        {alterado && (
           <button
             onClick={mostrarTudo}
-            className="w-full rounded-md py-2 text-[12px] text-texto-suave transition-colors hover:bg-white/[0.05] hover:text-texto"
+            className="mb-1 w-full rounded-md py-2 text-[12px] text-texto-suave transition-colors hover:bg-white/[0.05] hover:text-texto"
           >
             Mostrar todas as estruturas
           </button>
-        </footer>
-      )}
+        )}
+
+        {/* A licença CC BY-SA do acervo exige atribuição visível. Fica no
+            painel, e não sobre a cena, para não disputar espaço com o modelo. */}
+        <p className="px-2 py-1 text-[10px] leading-relaxed text-texto-fraco">
+          Modelos 3D derivados do{" "}
+          <a
+            href="https://lifesciencedb.jp/bp3d/"
+            target="_blank"
+            rel="noreferrer"
+            className="underline decoration-dotted underline-offset-2 hover:text-texto-suave"
+          >
+            BodyParts3D
+          </a>
+          , © Database Center for Life Science · CC BY-SA 2.1 JP
+        </p>
+      </footer>
     </aside>
   );
 }

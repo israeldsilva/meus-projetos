@@ -1,26 +1,35 @@
 "use client";
 
 import { Suspense, useEffect, useMemo, useRef } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, useGLTF, useProgress } from "@react-three/drei";
 import * as THREE from "three";
 import {
   DIVISOES,
+  ehEnvoltorio,
   ehTranslucida,
   porFma,
   porId,
   type Estrutura,
 } from "@/dados/estruturas";
-import { estaVisivel, useCena, type Vista } from "@/estado/cena";
+import { estaVisivel, useCena, type EixoCorte, type Vista } from "@/estado/cena";
 
 const MODELO = "/modelos/encefalo.glb";
 // Decodificador Draco servido localmente: o padrão do three aponta para um CDN
 // do Google, o que quebraria o app offline.
 const DRACO = "/draco/";
 
-/** Opacidade de repouso: os ventrículos envolvem tudo, então são translúcidos. */
-function opacidadeBase(estrutura: Estrutura): number {
-  return ehTranslucida(estrutura) ? 0.4 : 1;
+/**
+ * Opacidade de repouso da estrutura, antes de qualquer destaque.
+ * Os ventrículos são cavidades internas e ficam sempre translúcidos; o
+ * envoltório cortical obedece ao controle de raio-X.
+ */
+function opacidadeBase(estrutura: Estrutura, opacidadeCortex: number): number {
+  // Os ventrículos não acompanham o raio-X: são estruturas profundas, e o
+  // ponto de tornar o córtex transparente é justamente poder vê-los.
+  if (ehTranslucida(estrutura)) return 0.4;
+  if (ehEnvoltorio(estrutura)) return opacidadeCortex;
+  return 1;
 }
 
 /**
@@ -49,6 +58,70 @@ const VISTAS: Record<Vista, { theta: number; phi: number }> = {
 /** Menor caminho angular entre dois ângulos, em radianos. */
 function difAngular(de: number, para: number): number {
   return Math.atan2(Math.sin(para - de), Math.cos(para - de));
+}
+
+/**
+ * Normal de cada plano anatômico de corte, nos eixos da cena (+X esquerda,
+ * +Y superior, +Z anterior). O plano sagital separa os lados, o coronal separa
+ * frente e trás, o axial separa cima e baixo.
+ */
+const NORMAIS: Record<EixoCorte, THREE.Vector3> = {
+  sagital: new THREE.Vector3(1, 0, 0),
+  coronal: new THREE.Vector3(0, 0, 1),
+  axial: new THREE.Vector3(0, 1, 0),
+};
+
+/**
+ * Aplica os planos de corte à cena inteira.
+ *
+ * Usa o recorte GLOBAL do renderizador em vez de listas por material: os planos
+ * valem para todas as 100 malhas de uma vez, e o three recompila os shaders
+ * sozinho quando a quantidade de planos muda.
+ *
+ * Um `THREE.Plane` descarta o que estiver do lado negativo, onde
+ * `normal · ponto + constante < 0`. Para manter a metade além de `posicao` ao
+ * longo da normal, a constante é `-posicao`; inverter o corte troca o sinal
+ * dos dois, e a outra metade é que fica.
+ */
+function Cortes() {
+  const { gl } = useThree();
+  const cortes = useCena((s) => s.cortes);
+
+  const planos = useMemo(
+    () =>
+      ({
+        sagital: new THREE.Plane(),
+        coronal: new THREE.Plane(),
+        axial: new THREE.Plane(),
+      }) as Record<EixoCorte, THREE.Plane>,
+    [],
+  );
+
+  useEffect(() => {
+    const ativos: THREE.Plane[] = [];
+
+    for (const eixo of Object.keys(planos) as EixoCorte[]) {
+      const corte = cortes[eixo];
+      if (!corte.ativo) continue;
+
+      const sinal = corte.invertido ? -1 : 1;
+      const plano = planos[eixo];
+      plano.normal.copy(NORMAIS[eixo]).multiplyScalar(sinal);
+      plano.constant = -corte.posicao * sinal;
+      ativos.push(plano);
+    }
+
+    gl.clippingPlanes = ativos;
+  }, [cortes, gl, planos]);
+
+  // Deixar os planos ativos ao desmontar afetaria qualquer cena seguinte.
+  useEffect(() => {
+    return () => {
+      gl.clippingPlanes = [];
+    };
+  }, [gl]);
+
+  return null;
 }
 
 type Controles = {
@@ -114,8 +187,13 @@ function Encefalo() {
   const sobRotulo = useCena((s) => s.sobRotulo);
   const ocultas = useCena((s) => s.ocultas);
   const isolada = useCena((s) => s.isolada);
+  const opacidadeCortex = useCena((s) => s.opacidadeCortex);
+  const cortes = useCena((s) => s.cortes);
   const selecionar = useCena((s) => s.selecionar);
   const apontar = useCena((s) => s.apontar);
+
+  const cortando =
+    cortes.sagital.ativo || cortes.coronal.ativo || cortes.axial.ativo;
 
   // O cache do useGLTF é compartilhado; clonamos antes de trocar materiais
   // para não contaminar outras montagens do componente.
@@ -130,13 +208,10 @@ function Encefalo() {
       const estrutura = porFma.get(malha.name);
       if (!estrutura) return;
 
-      const opacidade = opacidadeBase(estrutura);
       malha.material = new THREE.MeshStandardMaterial({
         color: new THREE.Color(DIVISOES[estrutura.divisao].cor),
         roughness: 0.5,
         metalness: 0.04,
-        transparent: opacidade < 1,
-        opacity: opacidade,
       });
       malhas.push({ malha, estruturaId: estrutura.id });
     });
@@ -166,14 +241,23 @@ function Encefalo() {
       //
       // O valor precisa ser bem baixo porque as opacidades se ACUMULAM: o
       // córtex são dezenas de giros sobrepostos, e a 0,15 cada um o conjunto
-      // ainda soma quase opaco, escondendo as estruturas profundas — que são
-      // justamente as que mais interessam ver. O raio-X propriamente dito e os
-      // planos de corte vêm na Fase 3.
+      // ainda soma quase opaco, escondendo justamente as estruturas profundas
+      // que mais interessam ver.
       const recuada = haSelecao && !destacada;
-      const opacidade = opacidadeBase(estrutura) * (recuada ? 0.06 : 1);
+      const opacidade =
+        opacidadeBase(estrutura, opacidadeCortex) * (recuada ? 0.06 : 1);
 
       material.opacity = opacidade;
       material.depthWrite = opacidade > 0.95;
+
+      // Com um plano de corte ativo, a superfície interna precisa ser
+      // desenhada: sem ela a estrutura cortada fica um casco vazado, e vê-se
+      // o fundo da cena através dela.
+      const lado = cortando ? THREE.DoubleSide : THREE.FrontSide;
+      if (material.side !== lado) {
+        material.side = lado;
+        material.needsUpdate = true;
+      }
 
       // Só marcar como transparente o que de fato está: com 100 malhas, manter
       // todas em alpha-blend custa ordenação por profundidade a cada quadro.
@@ -191,7 +275,7 @@ function Encefalo() {
       material.emissive.set(destacada ? DIVISOES[estrutura.divisao].cor : "#000000");
       material.emissiveIntensity = eSelecionada ? 0.5 : eApontada ? 0.25 : 0;
     }
-  }, [malhas, selecionada, sobRotulo, ocultas, isolada]);
+  }, [malhas, selecionada, sobRotulo, ocultas, isolada, opacidadeCortex, cortando]);
 
   return (
     <primitive
@@ -265,6 +349,7 @@ export default function Viewer3D() {
           <Encefalo />
         </Suspense>
 
+        <Cortes />
         <AnimarCamera controles={controles} />
         <OrbitControls
           ref={controles as never}

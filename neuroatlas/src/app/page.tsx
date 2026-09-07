@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import ArvoreAnatomica from "@/componentes/ArvoreAnatomica";
 import Busca from "@/componentes/Busca";
 import FichaEstrutura from "@/componentes/FichaEstrutura";
-import PresetsCamera from "@/componentes/PresetsCamera";
+import BarraFerramentas from "@/componentes/BarraFerramentas";
 import { DIVISOES, porId } from "@/dados/estruturas";
 import { useCena } from "@/estado/cena";
 
@@ -48,23 +48,9 @@ export default function Pagina() {
       <Viewer3D />
       <ArvoreAnatomica />
       <FichaEstrutura />
-      <PresetsCamera />
+      <BarraFerramentas />
       <RotuloFlutuante />
       <Busca />
-
-      {/* A licença CC BY-SA do acervo exige atribuição visível. */}
-      <footer className="pointer-events-none absolute bottom-4 left-1/2 z-10 -translate-x-1/2 text-center text-[10.5px] leading-relaxed text-texto-fraco">
-        Modelos 3D derivados do{" "}
-        <a
-          href="https://lifesciencedb.jp/bp3d/"
-          target="_blank"
-          rel="noreferrer"
-          className="pointer-events-auto underline decoration-dotted underline-offset-2 hover:text-texto-suave"
-        >
-          BodyParts3D
-        </a>
-        , © Database Center for Life Science · CC BY-SA 2.1 JP
-      </footer>
     </main>
   );
 }

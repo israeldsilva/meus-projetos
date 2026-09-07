@@ -119,6 +119,28 @@ export function ehTranslucida(estrutura: Estrutura): boolean {
   return estrutura.divisao === "ventriculos";
 }
 
+const DIVISOES_ENVOLTORIO = new Set<Divisao>([
+  "lobo-frontal",
+  "lobo-parietal",
+  "lobo-temporal",
+  "lobo-occipital",
+  "insula",
+]);
+
+/**
+ * Estruturas que formam o envoltório externo do encéfalo e escondem o resto.
+ * São elas que o modo raio-X torna translúcidas.
+ *
+ * A substância branca do hemisfério entra na lista apesar de não ser córtex:
+ * é a massa logo abaixo dele e, opaca, esconde tudo o que há de mais profundo.
+ */
+export function ehEnvoltorio(estrutura: Estrutura): boolean {
+  return (
+    DIVISOES_ENVOLTORIO.has(estrutura.divisao) ||
+    estrutura.id === "substancia-branca-hemisferica"
+  );
+}
+
 /**
  * Estrutura par (direita e esquerda). Não basta contar malhas: o giro temporal
  * superior tem quatro, por vir dividido em partes anterior e posterior.

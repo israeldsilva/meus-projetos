@@ -59,6 +59,29 @@ if (process.env.CLICAR) {
   console.log("clicado:", process.env.CLICAR);
 }
 
+// RAIOX=1 torna o córtex translúcido.
+if (process.env.RAIOX) {
+  await pagina.getByRole("button", { name: "Raio-X" }).click();
+  await pagina.waitForTimeout(1500);
+  console.log("raio-X ligado");
+}
+
+// CORTE="Sagital" ativa um plano de corte; CORTE_POS ajusta sua posição.
+if (process.env.CORTE) {
+  await pagina.getByRole("button", { name: "Cortes" }).click();
+  await pagina.waitForTimeout(500);
+  await pagina.getByRole("button", { name: process.env.CORTE, exact: true }).click();
+  await pagina.waitForTimeout(1500);
+  if (process.env.CORTE_POS) {
+    const eixos = ["Sagital", "Coronal", "Axial"];
+    const i = eixos.indexOf(process.env.CORTE);
+    // O primeiro controle deslizante do painel é a opacidade do córtex.
+    await pagina.locator('input[type="range"]').nth(i + 1).fill(process.env.CORTE_POS);
+    await pagina.waitForTimeout(1500);
+  }
+  console.log("corte:", process.env.CORTE, process.env.CORTE_POS ?? "");
+}
+
 // BUSCAR="tálamo" abre a paleta de busca e digita o termo.
 if (process.env.BUSCAR) {
   await pagina.keyboard.press("Control+k");
