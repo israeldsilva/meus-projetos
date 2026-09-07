@@ -1,5 +1,14 @@
 import { create } from "zustand";
 
+/** Vistas anatômicas padronizadas, as mesmas de um atlas impresso. */
+export type Vista =
+  | "anterior"
+  | "posterior"
+  | "lateral-direita"
+  | "lateral-esquerda"
+  | "superior"
+  | "inferior";
+
 type EstadoCena = {
   /** Id da estrutura selecionada, ou null. */
   selecionada: string | null;
@@ -19,11 +28,18 @@ type EstadoCena = {
    */
   isolada: string | null;
 
+  /** Vista para a qual a câmera está indo; volta a null ao chegar. */
+  vista: Vista | null;
+  /** A paleta de busca está aberta. */
+  buscaAberta: boolean;
+
   selecionar: (id: string | null) => void;
   apontar: (id: string | null, origem?: "3d" | "arvore") => void;
   alternarVisibilidade: (id: string) => void;
   alternarIsolamento: (id: string) => void;
   mostrarTudo: () => void;
+  irPara: (vista: Vista | null) => void;
+  abrirBusca: (aberta: boolean) => void;
 };
 
 export const useCena = create<EstadoCena>((set) => ({
@@ -32,6 +48,8 @@ export const useCena = create<EstadoCena>((set) => ({
   origemRotulo: null,
   ocultas: new Set(),
   isolada: null,
+  vista: null,
+  buscaAberta: false,
 
   selecionar: (id) => set({ selecionada: id }),
 
@@ -54,6 +72,10 @@ export const useCena = create<EstadoCena>((set) => ({
     })),
 
   mostrarTudo: () => set({ ocultas: new Set(), isolada: null }),
+
+  irPara: (vista) => set({ vista }),
+
+  abrirBusca: (buscaAberta) => set({ buscaAberta }),
 }));
 
 /** Uma estrutura aparece se não está oculta e nenhum isolamento a exclui. */

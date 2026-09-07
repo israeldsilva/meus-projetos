@@ -37,128 +37,188 @@ Além das malhas, o acervo traz metadados que o projeto usa diretamente:
 | Arquivo | Uso no projeto |
 |---|---|
 | `parts_list_e.txt` | Mapeia FMA ID → nome em inglês (1.523 entradas) |
-| `conventional_part_of.txt` | **Hierarquia anatômica da FMA** (corpo → sistema nervoso → encéfalo → ...). É a fonte da árvore de navegação |
-| `composite_parts.txt` | Mapeia estruturas compostas → suas partes primitivas (ex.: tálamo → tálamo D + tálamo E) |
+| `conventional_part_of.txt` | **Hierarquia anatômica da FMA** (corpo → sistema nervoso → encéfalo → ...) |
+| `composite_parts.txt` | Mapeia estruturas compostas → suas partes primitivas |
 
 ---
 
-## Inventário de neuroanatomia
+## Como o acervo foi auditado
 
-Auditoria feita sobre o acervo completo: das **937 malhas STL** disponíveis, **71 são de
-neuroanatomia**, somando **~87 MB** brutos.
+> **Correção.** A primeira auditoria deste projeto buscou as estruturas de neuroanatomia
+> por **palavra-chave** no índice de nomes e concluiu que existiam 71 malhas. Estava
+> errado: o filtro perdia tudo que não continha os termos procurados — entre outros, o
+> **lobo occipital**, o **precúneo**, a **cápsula interna**, os **colículos** e os **corpos
+> geniculados**, todos presentes no acervo e centrais na disciplina. Um erro de busca
+> silencioso, que não falha — apenas devolve menos.
 
-A coluna "triângulos" orienta o alvo de decimação no pipeline — malhas acima de ~40k são
-reduzidas, as pequenas passam praticamente intactas.
+A auditoria correta não usa palavras: percorre a **hierarquia da ontologia FMA** a partir
+do nó `FMA7157` (sistema nervoso) em `conventional_part_of.txt`, recolhendo todo
+descendente que possua arquivo STL. O resultado é verificável e não depende de como cada
+estrutura foi nomeada:
 
-### Telencéfalo — córtex e giros (31)
+- **99 malhas** de sistema nervoso no acervo
+- **99 em uso** no Neuroatlas — cobertura integral
+- mais a **hipófise** (`FMA13889`), que fica fora dessa subárvore por ser glândula
+  endócrina, e não parte do sistema nervoso
 
-| FMA | Estrutura | Triângulos |
+Total: **62 estruturas, 100 malhas.**
+
+---
+
+## Inventário
+
+### Lobo frontal — 4 estruturas, 7 malhas
+
+| Estrutura | Latim | FMA |
 |---|---|---|
-| `FMA72653` / `FMA72654` | Giro frontal superior D / E | 30.448 / 30.450 |
-| `FMA72655` / `FMA72656` | Giro frontal médio D / E | 15.558 / 15.544 |
-| `FMA72661` / `FMA72662` | Giro pré-central D / E | 18.838 / 18.836 |
-| `FMA72665` / `FMA72666` | Giro pós-central D / E | 16.862 / 16.858 |
-| `FMA72800` / `FMA72801` | Giro temporal superior, parte anterior D / E | 8.348 / 8.338 |
-| `FMA72804` / `FMA72805` | Giro temporal superior, parte posterior D / E | 10.472 / 10.472 |
-| `FMA72685` / `FMA72686` | Giro temporal médio D / E | 12.926 / 12.918 |
-| `FMA72687` / `FMA72688` | Giro temporal inferior D / E | 13.056 / 13.040 |
-| `FMA72669` / `FMA72670` | Giro angular D / E | 13.172 / 13.164 |
-| `FMA72667` / `FMA72668` | Giro supramarginal D / E | 9.782 / 9.778 |
-| `FMA72689` / `FMA72690` | Giro fusiforme D / E | 6.150 / 6.148 |
-| `FMA72717` / `FMA72718` | Giro do cíngulo D / E | 11.716 / 11.724 |
-| `FMA72705` / `FMA72706` | Giro para-hipocampal D / E | 3.454 / 3.452 |
-| `FMA72977` / `FMA72978` | Ínsula D / E | 12.240 / 12.242 |
-| `FMA72701` / `FMA72702` | Giro curto acessório D / E | 15.346 / 15.330 |
-| `BP51` | Giros orbitais e giro reto | 21.388 |
+| Giro pré-central | *Gyrus precentralis* | `FMA72661` · `FMA72662` |
+| Giro frontal superior | *Gyrus frontalis superior* | `FMA72653` · `FMA72654` |
+| Giro frontal médio | *Gyrus frontalis medius* | `FMA72655` · `FMA72656` |
+| Giros orbitais e giro reto | *Gyri orbitales et gyrus rectus* | `BP51` |
 
-### Núcleos da base (6)
+### Lobo parietal — 4 estruturas, 8 malhas
 
-| FMA | Estrutura | Triângulos |
+| Estrutura | Latim | FMA |
 |---|---|---|
-| `FMA72826` / `FMA72827` | Núcleo caudado D / E | 11.272 / 11.160 |
-| `FMA72828` / `FMA72829` | Putâmen D / E | 30.670 / 30.636 |
-| `FMA72830` / `FMA72831` | Globo pálido D / E | 23.206 / 30.738 |
+| Giro pós-central | *Gyrus postcentralis* | `FMA72665` · `FMA72666` |
+| Giro supramarginal | *Gyrus supramarginalis* | `FMA72667` · `FMA72668` |
+| Giro angular | *Gyrus angularis* | `FMA72669` · `FMA72670` |
+| Lóbulo parietal superior e precúneo | *Lobulus parietalis superior et precuneus* | `BP50` · `BP49` |
 
-### Sistema límbico (7)
+### Lobo temporal — 4 estruturas, 10 malhas
 
-| FMA | Estrutura | Triângulos |
+| Estrutura | Latim | FMA |
 |---|---|---|
-| `FMA72713` / `FMA72714` | Hipocampo D / E | 4.452 / 4.280 |
-| `FMA72832` / `FMA72833` | Amígdala D / E | 1.744 / 1.736 |
-| `FMA72924` / `FMA72925` | Fórnix D / E | 29.300 / 29.372 |
-| `FMA61970` | Comissura do fórnix | 46.164 |
+| Giro temporal superior | *Gyrus temporalis superior* | `FMA72800` · `FMA72801` · `FMA72804` · `FMA72805` |
+| Giro temporal médio | *Gyrus temporalis medius* | `FMA72685` · `FMA72686` |
+| Giro temporal inferior | *Gyrus temporalis inferior* | `FMA72687` · `FMA72688` |
+| Giro fusiforme | *Gyrus fusiformis* | `FMA72689` · `FMA72690` |
 
-### Substância branca (4)
+### Lobo occipital — 1 estrutura, 2 malhas
 
-| FMA | Estrutura | Triângulos |
+| Estrutura | Latim | FMA |
 |---|---|---|
-| `FMA86464` | Corpo caloso | 132.552 |
-| `FMA61822` | Substância branca do hemisfério cerebral | 176.564 |
-| `FMA73413` / `FMA73414` | Estria medular do tálamo D / E | 3.852 / 3.870 |
+| Lobo occipital | *Lobus occipitalis* | `FMA72975` · `FMA72976` |
 
-### Diencéfalo (5)
+### Ínsula — 2 estruturas, 4 malhas
 
-| FMA | Estrutura | Triângulos |
+| Estrutura | Latim | FMA |
 |---|---|---|
-| `FMA258714` / `FMA258716` | Tálamo D / E | 3.298 / 7.396 |
-| `FMA62008nsn` | Hipotálamo | 17.690 |
-| `FMA62033` | Corpo pineal | 2.536 |
-| `FMA13889` | Hipófise | 5.052 |
+| Ínsula | *Insula* | `FMA72977` · `FMA72978` |
+| Giro curto acessório da ínsula | *Gyrus breves accessorius insulae* | `FMA72701` · `FMA72702` |
 
-### Tronco encefálico (4)
+### Lobo límbico — 6 estruturas, 11 malhas
 
-| FMA | Estrutura | Triângulos |
+| Estrutura | Latim | FMA |
 |---|---|---|
-| `FMA61993nsn` | Mesencéfalo | 56.314 |
-| `FMA62394` | Pedúnculo cerebral | 46.834 |
-| `FMA67943` | Ponte | 90.072 |
-| `FMA62004` | Bulbo (medula oblonga) | 52.760 |
+| Giro do cíngulo | *Gyrus cinguli* | `FMA72717` · `FMA72718` |
+| Giro para-hipocampal | *Gyrus parahippocampalis* | `FMA72705` · `FMA72706` |
+| Hipocampo | *Hippocampus* | `FMA72713` · `FMA72714` |
+| Corpo amigdaloide | *Corpus amygdaloideum* | `FMA72832` · `FMA72833` |
+| Fórnix | *Fornix* | `FMA72924` · `FMA72925` |
+| Comissura do fórnix | *Commissura fornicis* | `FMA61970` |
 
-### Cerebelo (1)
+### Substância branca — 8 estruturas, 11 malhas
 
-| FMA | Estrutura | Triângulos |
+| Estrutura | Latim | FMA |
 |---|---|---|
-| `FMA67944` | Cerebelo | 238.506 |
+| Corpo caloso | *Corpus callosum* | `FMA86464` |
+| Substância branca do hemisfério | *Substantia alba hemispherii cerebri* | `FMA61822` |
+| Estria medular do tálamo | *Stria medullaris thalami* | `FMA73413` · `FMA73414` |
+| Cápsula interna, ramo anterior | *Crus anterius capsulae internae* | `FMA72908` · `FMA72909` |
+| Comissura anterior | *Commissura anterior* | `FMA61961` |
+| Comissura posterior | *Commissura posterior* | `FMA62072` |
+| Septo pelúcido | *Septum pellucidum* | `FMA61844` |
+| Estria terminal | *Stria terminalis* | `FMA72939` · `FMA72940` |
 
-### Ventrículos e LCR (8)
+### Núcleos da base — 3 estruturas, 6 malhas
 
-| FMA | Estrutura | Triângulos |
+| Estrutura | Latim | FMA |
 |---|---|---|
-| `FMA78449` / `FMA78450` | Ventrículo lateral D / E | 78.218 / 78.010 |
-| `FMA78454` | Terceiro ventrículo | 16.808 |
-| `FMA78469` | Quarto ventrículo | 30.134 |
-| `FMA78467` | Aqueduto cerebral | 2.252 |
-| `FMA78497` | Canal central da medula espinhal | 3.162 |
-| `FMA274027` / `FMA274029` | Plexo corióide D / E | 21.558 / 21.508 |
+| Núcleo caudado | *Nucleus caudatus* | `FMA72826` · `FMA72827` |
+| Putâmen | *Putamen* | `FMA72828` · `FMA72829` |
+| Globo pálido | *Globus pallidus* | `FMA72830` · `FMA72831` |
 
-### Via óptica (5)
+### Diencéfalo — 9 estruturas, 12 malhas
 
-| FMA | Estrutura | Triângulos |
+| Estrutura | Latim | FMA |
 |---|---|---|
-| `FMA50875` / `FMA50878` | Nervo óptico D / E | 10.310 / 10.302 |
-| `FMA62382` / `FMA67936` | Trato óptico D / E | 10.110 / 10.122 |
-| `FMA62045` | Quiasma óptico | 7.752 |
+| Tálamo | *Thalamus* | `FMA258714` · `FMA258716` |
+| Hipotálamo | *Hypothalamus* | `FMA62008nsn` |
+| Hipófise | *Hypophysis* | `FMA13889` |
+| Corpo pineal | *Corpus pineale* | `FMA62033` |
+| Corpo geniculado lateral | *Corpus geniculatum laterale* | `FMA73303` · `FMA73304` |
+| Corpo geniculado medial | *Corpus geniculatum mediale* | `FMA73309` · `FMA73310` |
+| Corpo mamilar | *Corpus mamillare* | `FMA74877` |
+| Habênula | *Habenula* | `FMA62032` |
+| Tuber cinereum | *Tuber cinereum* | `FMA62327` |
+
+### Tronco encefálico — 9 estruturas, 13 malhas
+
+| Estrutura | Latim | FMA |
+|---|---|---|
+| Mesencéfalo | *Mesencephalon* | `FMA61993nsn` |
+| Pedúnculo cerebral | *Pedunculus cerebri* | `FMA62394` |
+| Ponte | *Pons* | `FMA67943` |
+| Bulbo | *Medulla oblongata* | `FMA62004` |
+| Colículo superior | *Colliculus superior* | `FMA73422` · `FMA73423` |
+| Colículo inferior | *Colliculus inferior* | `FMA73434` · `FMA73435` |
+| Braquio do colículo superior | *Brachium colliculi superioris* | `FMA73461` · `FMA73462` |
+| Braquio do colículo inferior | *Brachium colliculi inferioris* | `FMA73463` · `FMA73464` |
+| Fossa interpeduncular | *Fossa interpeduncularis* | `FMA83740` |
+
+### Cerebelo — 1 estrutura, 1 malha
+
+| Estrutura | Latim | FMA |
+|---|---|---|
+| Cerebelo | *Cerebellum* | `FMA67944` |
+
+### Ventrículos e LCR — 8 estruturas, 10 malhas
+
+| Estrutura | Latim | FMA |
+|---|---|---|
+| Ventrículo lateral | *Ventriculus lateralis* | `FMA78449` · `FMA78450` |
+| Terceiro ventrículo | *Ventriculus tertius* | `FMA78454` |
+| Aqueduto cerebral | *Aqueductus mesencephali* | `FMA78467` |
+| Quarto ventrículo | *Ventriculus quartus* | `FMA78469` |
+| Canal central da medula espinhal | *Canalis centralis* | `FMA78497` |
+| Plexo corióide | *Plexus choroideus* | `FMA274027` · `FMA274029` |
+| Lâmina terminal | *Lamina terminalis* | `FMA61975` |
+| Forame interventricular | *Foramen interventriculare* | `FMA75351` |
+
+### Via óptica — 3 estruturas, 5 malhas
+
+| Estrutura | Latim | FMA |
+|---|---|---|
+| Nervo óptico | *Nervus opticus* | `FMA50875` · `FMA50878` |
+| Quiasma óptico | *Chiasma opticum* | `FMA62045` |
+| Trato óptico | *Tractus opticus* | `FMA62382` · `FMA67936` |
 
 ---
 
 ## Lacunas do acervo
 
-Duas partes da matéria **não têm malha 3D neste acervo**:
+Como a cobertura do sistema nervoso é agora **integral**, o que falta não está no
+Neuroatlas porque **não existe no BodyParts3D**:
 
-- **Medula espinhal** (`FMA7647`) — não existe. Só o canal central (`FMA78497`).
-- **Nervos cranianos** — apenas o **óptico (II)** existe, junto com o quiasma e o trato.
-  Faltam os outros onze: olfatório (I), oculomotor (III), troclear (IV), trigêmeo (V),
-  abducente (VI), facial (VII), vestibulococlear (VIII), glossofaríngeo (IX), vago (X),
-  acessório (XI) e hipoglosso (XII).
+- **Medula espinhal** (`FMA7647`) — só o canal central (`FMA78497`) tem malha.
+- **Nervos cranianos** — apenas o **óptico (II)**, com o quiasma e o trato. Faltam
+  olfatório (I), oculomotor (III), troclear (IV), trigêmeo (V), abducente (VI), facial
+  (VII), vestibulococlear (VIII), glossofaríngeo (IX), vago (X), acessório (XI) e
+  hipoglosso (XII).
+- **Giro frontal inferior** (área de Broca) e os **giros temporais transversos**
+  (de Heschl) não têm malha própria. Por isso a ínsula, que eles cobririam, aparece
+  exposta na face lateral — não é erro de renderização, é ausência dos opérculos no
+  acervo.
 
 Isso é tratado na **Fase 5** do [plano](PLANO.md), com fonte a definir.
 
-**Não geramos geometria aproximada para preencher essas lacunas.** Num material de estudo de
-mestrado, uma lacuna sinalizada é honesta; anatomia inventada é um erro que a pessoa carrega
-para a prova.
+**Não geramos geometria aproximada para preencher essas lacunas.** Num material de estudo
+de mestrado, uma lacuna sinalizada é honesta; anatomia inventada é um erro que a pessoa
+carrega para a prova.
 
 ### Nota sobre o sufixo `nsn`
 
 Alguns IDs terminam em `nsn` (ex.: `FMA61993nsn`, `FMA62008nsn`). É a convenção do próprio
-BodyParts3D para a malha **"no sub-nodes"** — a estrutura representada como sólido único, sem
-subdivisão nas suas partes componentes. Para o nosso uso é exatamente o que queremos.
+BodyParts3D para a malha **"no sub-nodes"** — a estrutura representada como sólido único,
+sem subdivisão nas suas partes componentes. Para o nosso uso é exatamente o que queremos.

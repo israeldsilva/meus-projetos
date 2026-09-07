@@ -1,6 +1,6 @@
 "use client";
 
-import { DIVISOES, porId } from "@/dados/estruturas";
+import { DIVISOES, ehBilateral, porId } from "@/dados/estruturas";
 import { useCena } from "@/estado/cena";
 
 function Secao({ titulo, texto }: { titulo: string; texto: string }) {
@@ -24,7 +24,7 @@ export default function FichaEstrutura() {
   if (!estrutura) return null;
 
   const divisao = DIVISOES[estrutura.divisao];
-  const lados = estrutura.malhas.filter((m) => m.lado).length;
+  const bilateral = ehBilateral(estrutura);
 
   return (
     <aside className="painel rolagem absolute top-4 right-4 bottom-4 z-10 flex w-[350px] flex-col overflow-hidden rounded-xl">
@@ -46,7 +46,7 @@ export default function FichaEstrutura() {
             <p className="mt-1 text-[13px] italic text-texto-suave">{estrutura.latim}</p>
             <p className="mt-0.5 text-[11px] text-texto-fraco">
               {estrutura.ingles}
-              {lados === 2 && " · estrutura par (direita e esquerda)"}
+              {bilateral && " · estrutura par (direita e esquerda)"}
             </p>
           </div>
 

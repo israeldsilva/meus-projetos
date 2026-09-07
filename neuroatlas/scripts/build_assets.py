@@ -30,11 +30,15 @@ ESTRUTURAS = RAIZ / "src" / "dados" / "estruturas.json"
 SAIDA = RAIZ / "public" / "modelos" / "encefalo.glb"
 
 # Orçamento de triângulos por malha. Acima disso a malha é decimada.
-LIMITE_FACES = 25_000
+#
+# Com 100 malhas, o total é o que decide se o atlas roda bem no celular. As
+# estruturas são superfícies orgânicas e lisas, que toleram bem a decimação —
+# o custo em fidelidade é pequeno perto do ganho em fluidez.
+LIMITE_FACES = 15_000
 
 # O cerebelo precisa de mais orçamento: suas folhas (folia) são detalhe fino e
-# somem se a decimação for agressiva demais.
-LIMITES_ESPECIAIS = {"FMA67944": 40_000}
+# viram um borrão se a decimação for agressiva demais.
+LIMITES_ESPECIAIS = {"FMA67944": 30_000}
 
 # Aresta do cubo que envolve o conjunto, em unidades de cena. O encéfalo inteiro
 # passa a caber num volume de ~2 unidades, escala confortável para a câmera.

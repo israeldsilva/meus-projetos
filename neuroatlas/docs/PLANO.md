@@ -26,7 +26,10 @@ Science (Universidade de Tóquio). Anatomia humana real obtida por escaneamento 
 
 O acervo foi baixado e auditado antes de escrever este plano. Confirmado:
 
-- **937 malhas STL binárias** no total; **71 são de neuroanatomia**, somando ~87 MB brutos.
+- **937 malhas STL binárias** no total; **99 são de sistema nervoso**.
+  *(A primeira auditoria buscou por palavra-chave e contou 71, perdendo o lobo occipital,
+  o precúneo, a cápsula interna, os colículos e os corpos geniculados. A contagem correta
+  vem de percorrer a hierarquia da ontologia FMA — ver [FONTES.md](FONTES.md).)*
 - Quase tudo vem **lateralizado (direita/esquerda)** — ideal para estudo.
 - Cada malha é indexada por **FMA ID** (Foundational Model of Anatomy), identificador de
   ontologia estável.
@@ -164,7 +167,7 @@ painel direito com a ficha da estrutura selecionada. Ambos recolhíveis.
 |---|---|---|
 | **0** | Plano documentado em `docs/`, commitado e enviado ao GitHub | Plano versionado |
 | **1** | **Fatia vertical:** pipeline + viewer 3D + árvore + fichas das estruturas-chave | **App real rodando** — gira, clica, lê a ficha |
-| **2** | Acervo completo (71 estruturas), árvore FMA completa, busca ⌘K, presets de câmera | Atlas navegável completo |
+| **2** | Acervo completo (62 estruturas, 100 malhas), árvore por lobo, busca ⌘K, presets de câmera | Atlas navegável completo |
 | **3** | Planos de corte, modo raio-X, isolamento, controle de opacidade | Ferramenta de exploração espacial |
 | **4** | Modo estudo: quiz, flashcards SM-2, trilhas, painel de progresso | Ferramenta de estudo ativo |
 | **5** | Medula espinhal e nervos cranianos (fonte a definir) | Cobertura da matéria completa |
@@ -258,6 +261,6 @@ Cada fase seguinte encerra com o app rodando e uma captura de tela do estado nov
 | Risco | Mitigação |
 |---|---|
 | Malhas decimadas ficarem feias ou perderem detalhe anatômico | Ajustar alvo por estrutura; as pequenas (amígdala, pineal) quase não são tocadas |
-| GLB único pesar demais na Fase 2 (71 estruturas) | Dividir por grupo anatômico e carregar sob demanda |
-| Desempenho de 71 malhas no celular | Instancing, frustum culling, nível de detalhe reduzido no mobile |
+| GLB único pesar demais com o acervo completo | Resolvido na Fase 2: 100 malhas em 2,7 MB. Se crescer, dividir por grupo anatômico e carregar sob demanda |
+| Desempenho de 100 malhas no celular | Orçamento de 15 mil faces por malha na Fase 2. Se ainda pesar: nível de detalhe reduzido no mobile e carregamento sob demanda |
 | Precisão do conteúdo das fichas | Todo o conteúdo concentrado em `docs/CONTEUDO.md`, num só lugar, para revisão da mestranda |

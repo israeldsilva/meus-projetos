@@ -59,6 +59,24 @@ if (process.env.CLICAR) {
   console.log("clicado:", process.env.CLICAR);
 }
 
+// BUSCAR="tálamo" abre a paleta de busca e digita o termo.
+if (process.env.BUSCAR) {
+  await pagina.keyboard.press("Control+k");
+  await pagina.waitForTimeout(400);
+  await pagina.keyboard.type(process.env.BUSCAR, { delay: 40 });
+  await pagina.waitForTimeout(600);
+  console.log("busca:", process.env.BUSCAR);
+}
+
+// VISTA="Posterior" aciona um preset de câmera antes da captura.
+if (process.env.VISTA) {
+  await pagina.getByRole("button", { name: process.env.VISTA, exact: true }).click();
+  // Folga generosa: sem GPU, este ambiente renderiza a menos de 1 quadro por
+  // segundo, e a transição precisa de alguns quadros para assentar.
+  await pagina.waitForTimeout(8000);
+  console.log("vista:", process.env.VISTA);
+}
+
 if (process.env.ISOLAR) {
   await pagina.getByRole("button", { name: "Isolar no 3D" }).click();
   await pagina.waitForTimeout(1200);

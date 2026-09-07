@@ -26,7 +26,7 @@ completo, a arquitetura e as fases de entrega.
 |---|---|---|
 | 0 | Plano documentado e versionado | ✅ |
 | 1 | Fatia vertical: pipeline + viewer 3D + árvore + fichas | ✅ |
-| 2 | Acervo completo (71 estruturas), busca, presets de câmera | ⏳ |
+| 2 | Acervo completo (62 estruturas), busca ⌘K, presets de câmera | ✅ |
 | 3 | Planos de corte, modo raio-X, isolamento | ⏳ |
 | 4 | Modo estudo: quiz, flashcards, trilhas | ⏳ |
 | 5 | Medula espinhal e nervos cranianos | ⏳ |
@@ -59,7 +59,7 @@ CLICAR="Tálamo" ISOLAR=1 node scripts/captura.mjs isolado.png
 ## Documentação
 
 - **[PLANO.md](docs/PLANO.md)** — escopo, arquitetura, stack e fases
-- **[FONTES.md](docs/FONTES.md)** — proveniência dos modelos 3D, licença e inventário das 71 estruturas
+- **[FONTES.md](docs/FONTES.md)** — proveniência dos modelos 3D, licença e inventário completo das 62 estruturas
 
 ## Licença
 

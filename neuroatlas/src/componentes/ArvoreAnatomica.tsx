@@ -1,8 +1,11 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
   DIVISOES,
   ORDEM_DIVISOES,
+  ehBilateral,
+  estruturas,
   estruturasDaDivisao,
   type Estrutura,
 } from "@/dados/estruturas";
@@ -44,7 +47,7 @@ function Linha({ estrutura, cor }: { estrutura: Estrutura; cor: string }) {
   const visivel = estaVisivel(estrutura.id, ocultas, isolada);
   const ativa = selecionada === estrutura.id;
   const isolando = isolada === estrutura.id;
-  const bilateral = estrutura.malhas.length > 1;
+  const bilateral = ehBilateral(estrutura);
 
   return (
     <div
@@ -111,15 +114,37 @@ export default function ArvoreAnatomica() {
   const ocultas = useCena((s) => s.ocultas);
   const isolada = useCena((s) => s.isolada);
   const mostrarTudo = useCena((s) => s.mostrarTudo);
+  const abrirBusca = useCena((s) => s.abrirBusca);
   const alterado = ocultas.size > 0 || isolada !== null;
+
+  // Detectado depois da montagem: ler o agente do usuário durante a renderização
+  // faria o HTML do servidor divergir do cliente.
+  const [atalho, setAtalho] = useState("Ctrl K");
+  useEffect(() => {
+    if (/Mac|iPhone|iPad/.test(navigator.userAgent)) setAtalho("⌘K");
+  }, []);
 
   return (
     <aside className="painel rolagem absolute top-4 bottom-4 left-4 z-10 flex w-[270px] flex-col overflow-hidden rounded-xl">
-      <header className="shrink-0 border-b border-borda px-4 pt-4 pb-3">
-        <h1 className="text-[15px] font-medium tracking-tight">Neuroatlas</h1>
-        <p className="mt-0.5 text-[11px] text-texto-fraco">
-          Encéfalo · {ORDEM_DIVISOES.length} divisões
-        </p>
+      <header className="shrink-0 border-b border-borda px-3 pt-4 pb-3">
+        <div className="px-1">
+          <h1 className="text-[15px] font-medium tracking-tight">Neuroatlas</h1>
+          <p className="mt-0.5 text-[11px] text-texto-fraco">
+            Encéfalo · {estruturas.length} estruturas
+          </p>
+        </div>
+
+        <button
+          onClick={() => abrirBusca(true)}
+          className="mt-3 flex w-full items-center gap-2 rounded-md border border-borda px-2.5 py-2 text-left text-[12px] text-texto-fraco transition-colors hover:bg-white/[0.04] hover:text-texto-suave"
+        >
+          <svg viewBox="0 0 16 16" className="h-3.5 w-3.5 shrink-0" fill="none" strokeWidth="1.5">
+            <circle cx="7" cy="7" r="4.5" stroke="currentColor" />
+            <path d="m10.5 10.5 3 3" stroke="currentColor" strokeLinecap="round" />
+          </svg>
+          <span className="flex-1">Buscar…</span>
+          <kbd className="rounded border border-borda px-1 py-px text-[10px]">{atalho}</kbd>
+        </button>
       </header>
 
       <div className="rolagem flex-1 overflow-y-auto px-2 py-2">

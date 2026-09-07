@@ -3,7 +3,9 @@
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import ArvoreAnatomica from "@/componentes/ArvoreAnatomica";
+import Busca from "@/componentes/Busca";
 import FichaEstrutura from "@/componentes/FichaEstrutura";
+import PresetsCamera from "@/componentes/PresetsCamera";
 import { DIVISOES, porId } from "@/dados/estruturas";
 import { useCena } from "@/estado/cena";
 
@@ -46,7 +48,9 @@ export default function Pagina() {
       <Viewer3D />
       <ArvoreAnatomica />
       <FichaEstrutura />
+      <PresetsCamera />
       <RotuloFlutuante />
+      <Busca />
 
       {/* A licença CC BY-SA do acervo exige atribuição visível. */}
       <footer className="pointer-events-none absolute bottom-4 left-1/2 z-10 -translate-x-1/2 text-center text-[10.5px] leading-relaxed text-texto-fraco">
