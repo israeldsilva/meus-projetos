@@ -25,12 +25,36 @@ completo, a arquitetura e as fases de entrega.
 | Fase | Entrega | Estado |
 |---|---|---|
 | 0 | Plano documentado e versionado | ✅ |
-| 1 | Fatia vertical: pipeline + viewer 3D + árvore + fichas | 🔨 em andamento |
+| 1 | Fatia vertical: pipeline + viewer 3D + árvore + fichas | ✅ |
 | 2 | Acervo completo (71 estruturas), busca, presets de câmera | ⏳ |
 | 3 | Planos de corte, modo raio-X, isolamento | ⏳ |
 | 4 | Modo estudo: quiz, flashcards, trilhas | ⏳ |
 | 5 | Medula espinhal e nervos cranianos | ⏳ |
 | 6 | Polimento, PWA offline, deploy | ⏳ |
+
+## Rodando localmente
+
+```bash
+npm install
+npm run dev          # http://localhost:3000
+```
+
+O `encefalo.glb` já vem versionado, então o app roda sem nenhum passo extra.
+Para regerá-lo (ao acrescentar estruturas em `src/dados/estruturas.json`), é
+preciso o acervo BodyParts3D, que não é versionado aqui por causa do tamanho:
+
+```bash
+git clone --depth 1 https://github.com/Kevin-Mattheus-Moerman/BodyParts3D
+python3 scripts/build_assets.py --acervo ./BodyParts3D
+npx @gltf-transform/cli draco public/modelos/encefalo.glb public/modelos/encefalo.glb
+```
+
+Verificação visual, com o servidor rodando:
+
+```bash
+node scripts/captura.mjs tela.png
+CLICAR="Tálamo" ISOLAR=1 node scripts/captura.mjs isolado.png
+```
 
 ## Documentação
 
