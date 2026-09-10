@@ -26,19 +26,31 @@ from pathlib import Path
 
 DATA_FILE = Path(__file__).parent / "salary_data.json"
 
-# Common Danish <-> anglicized spelling variants
+# Portuguese accented characters and their unaccented equivalents. Salary
+# datasets and job postings disagree constantly about accents on company names
+# ("Natura" vs "Natúra", "Localiza" vs "Localiza Hertz"), and a user typing a
+# company name rarely types the accents at all.
 SPELLING_VARIANTS = {
-    "ø": "o", "æ": "ae", "å": "aa",
-    "ö": "o", "ä": "ae", "ü": "u",
+    "á": "a", "à": "a", "ã": "a", "â": "a",
+    "é": "e", "ê": "e",
+    "í": "i",
+    "ó": "o", "ô": "o", "õ": "o",
+    "ú": "u", "ü": "u",
+    "ç": "c",
 }
 
-# Legal suffixes and noise to strip when matching company names
+# Legal suffixes and noise to strip when matching company names. Brazilian
+# corporate names carry a type suffix (LTDA, S.A., ME, EPP) that varies between
+# the CNPJ registration and how the company brands itself, plus a "do Brasil"
+# tail on the local arm of a multinational - none of it distinguishes one
+# employer from another.
 STRIP_PATTERNS = [
-    r"\ba/s\b", r"\baps\b", r"\bi/s\b", r"\bp/s\b", r"\bk/s\b",
-    r"\bivs\b", r"\bamba\b", r"\ba\.m\.b\.a\.?\b",
-    r"\(vg\)", r"\(.*?\)",  # (VG) and other parentheticals
-    r"\bdanmark\b", r"\bdenmark\b", r"\bscandinavia\b", r"\bnordic\b",
-    r"\bgroup\b", r"\bholding\b",
+    r"\bltda\.?\b", r"\bs/?\.?a\.?\b", r"\bs/s\b",
+    r"\bme\b", r"\bepp\b", r"\beireli\b", r"\bmei\b",
+    r"\bcia\.?\b", r"\bcompanhia\b",
+    r"\(.*?\)",  # parentheticals
+    r"\bdo brasil\b", r"\bbrasil\b", r"\bbrazil\b",
+    r"\bgroup\b", r"\bgrupo\b", r"\bholding\b", r"\bparticipa[cç][oõ]es\b",
     r",\s*.*$",  # everything after comma (sub-entities)
 ]
 
@@ -166,15 +178,15 @@ def normalize(s):
     s = s.lower().strip()
     for pat in STRIP_PATTERNS:
         s = re.sub(pat, "", s)
-    s = re.sub(r"[^a-zæøåöäü0-9]", "", s)
+    s = re.sub(r"[^a-záàãâéêíóôõúüç0-9]", "", s)
     return s.strip()
 
 
-def anglicize(s):
-    """Convert Danish/Nordic characters to anglicized equivalents."""
+def strip_accents(s):
+    """Strip Portuguese accents so accented and unaccented spellings match."""
     s = s.lower()
-    for danish, english in SPELLING_VARIANTS.items():
-        s = s.replace(danish, english)
+    for accented, plain in SPELLING_VARIANTS.items():
+        s = s.replace(accented, plain)
     return s
 
 
@@ -183,11 +195,11 @@ def extract_core_words(s):
     s = s.lower()
     for pat in STRIP_PATTERNS:
         s = re.sub(pat, "", s)
-    words = re.findall(r"[a-zæøåöäü0-9]+", s)
+    words = re.findall(r"[a-záàãâéêíóôõúüç0-9]+", s)
     return [w for w in words if len(w) > 1]
 
 
-def match_score_optimized(q_norm, q_ang, q_words_set, q_words_ang_set, query, entry_name):
+def match_score_optimized(q_norm, q_plain, q_words_set, q_words_plain_set, query, entry_name):
     """Compute a match score between 0 and 100 using precalculated query values."""
     n_norm = normalize(entry_name)
 
@@ -214,15 +226,15 @@ def match_score_optimized(q_norm, q_ang, q_words_set, q_words_ang_set, query, en
         else:
             return 80 + int(ratio * 10)
 
-    n_ang = anglicize(n_norm)
-    if q_ang == n_ang:
+    n_plain = strip_accents(n_norm)
+    if q_plain == n_plain:
         return 85
-    if q_ang in n_ang or n_ang in q_ang:
-        shorter = min(len(q_ang), len(n_ang))
-        longer = max(len(q_ang), len(n_ang))
+    if q_plain in n_plain or n_plain in q_plain:
+        shorter = min(len(q_plain), len(n_plain))
+        longer = max(len(q_plain), len(n_plain))
         if shorter <= 4 and shorter / longer < 0.5:
-            n_words_ang = {anglicize(w) for w in extract_core_words(entry_name)}
-            if q_words_ang_set & n_words_ang:
+            n_words_plain = {strip_accents(w) for w in extract_core_words(entry_name)}
+            if q_words_plain_set & n_words_plain:
                 return 75
         else:
             return 75
@@ -233,13 +245,13 @@ def match_score_optimized(q_norm, q_ang, q_words_set, q_words_ang_set, query, en
 
     overlap = q_words_set & n_words
     if not overlap:
-        n_words_ang = {anglicize(w) for w in n_words}
-        overlap = q_words_ang_set & n_words_ang
+        n_words_plain = {strip_accents(w) for w in n_words}
+        overlap = q_words_plain_set & n_words_plain
 
     if overlap:
         if len(q_words_set) == 1:
             q_word = list(q_words_set)[0]
-            if q_word in n_words or anglicize(q_word) in {anglicize(w) for w in n_words}:
+            if q_word in n_words or strip_accents(q_word) in {strip_accents(w) for w in n_words}:
                 return 70
             else:
                 return 0
@@ -253,11 +265,11 @@ def match_score_optimized(q_norm, q_ang, q_words_set, q_words_ang_set, query, en
 def match_score(query, entry_name):
     """Compute a match score between 0 and 100 for ranking results."""
     q_norm = normalize(query)
-    q_ang = anglicize(q_norm)
+    q_plain = strip_accents(q_norm)
     q_words = extract_core_words(query)
     q_words_set = set(q_words)
-    q_words_ang_set = {anglicize(w) for w in q_words}
-    return match_score_optimized(q_norm, q_ang, q_words_set, q_words_ang_set, query, entry_name)
+    q_words_plain_set = {strip_accents(w) for w in q_words}
+    return match_score_optimized(q_norm, q_plain, q_words_set, q_words_plain_set, query, entry_name)
 
 
 def search_company(data, query, city=None):
@@ -267,19 +279,19 @@ def search_company(data, query, city=None):
 
     # Pre-calculate query representations once to avoid redundant computations inside the loop
     q_norm = normalize(query)
-    q_ang = anglicize(q_norm)
+    q_plain = strip_accents(q_norm)
     q_words = extract_core_words(query)
     q_words_set = set(q_words)
-    q_words_ang_set = {anglicize(w) for w in q_words}
+    q_words_plain_set = {strip_accents(w) for w in q_words}
 
     for entry in companies:
         if city:
             city_lower = city.lower()
             entry_city = (entry.get("city") or "").lower()
-            if city_lower not in entry_city and anglicize(city_lower) not in anglicize(entry_city):
+            if city_lower not in entry_city and strip_accents(city_lower) not in strip_accents(entry_city):
                 continue
 
-        score = match_score_optimized(q_norm, q_ang, q_words_set, q_words_ang_set, query, entry["company"])
+        score = match_score_optimized(q_norm, q_plain, q_words_set, q_words_plain_set, query, entry["company"])
         if score > 0:
             scored.append((score, entry))
 

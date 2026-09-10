@@ -1,21 +1,21 @@
-%% Example CV - [YOUR_NAME]
-%% Comprehensive overview of all competencies, experience, and achievements.
-%% Use as a master reference when tailoring role-specific CVs.
+%% Currículo de exemplo - [YOUR_NAME]
+%% Visão geral de competências, experiência e realizações.
+%% Use como referência-mestra ao personalizar currículos por vaga.
 %%
-%% SETUP: Run /setup to populate this with your actual information.
-%% Compile with: lualatex main_example.tex
-%% (pdflatex often fails on modern MiKTeX with fontawesome5 font-expansion errors.)
+%% SETUP: rode /setup para preencher com seus dados reais.
+%% Compile com: lualatex main_example.tex
+%% (pdflatex costuma falhar em MiKTeX moderno com erros de expansão de fonte do fontawesome5.)
 
 \documentclass[11pt,a4paper,sans]{moderncv}
 \moderncvstyle{banking}
 \moderncvcolor{blue}
 
-% Force the name and section headings to render in moderncv blue (color1).
-% Default banking leaves them black: moderncvstylebanking.sty's \colorlet
-% copies (not aliases) the pre-scheme accent colour, so the name colours are
-% frozen before \moderncvcolor runs. Re-let them after. \namefont is the hook
-% every name-style macro routes through, so this also works on moderncv 2.3.1
-% (Debian/Ubuntu apt), which has no \firstnamestyle/\lastnamestyle at all.
+% Força o nome e os títulos de seção a renderizarem no azul do moderncv (color1).
+% O estilo banking padrão os deixa pretos: o \colorlet do moderncvstylebanking.sty
+% copia (não referencia) a cor de destaque anterior ao esquema, então as cores do
+% nome são congeladas antes do \moderncvcolor rodar. Reatribua depois. \namefont é
+% o hook por onde toda macro de estilo de nome passa, então isto também funciona no
+% moderncv 2.3.1 (apt do Debian/Ubuntu), que não tem \firstnamestyle/\lastnamestyle.
 \renewcommand*{\namefont}{\fontsize{34}{36}\bfseries\upshape}
 \colorlet{firstnamecolor}{color1}
 \colorlet{lastnamecolor}{color1}
@@ -23,161 +23,169 @@
 \renewcommand*{\sectionstyle}[1]{{\sectionfont\color{color1}#1}}
 
 \usepackage[utf8]{inputenc}
-% moderncv loads hyperref itself in an \AtEndPreamble hook, so \hypersetup
-% must go in an \AtEndPreamble of our own: on moderncv < 2.4 a top-level
-% \usepackage{hyperref} clashes with the class's own
-% \RequirePackage[unicode]{hyperref}. From 2.4.0 the class passes its options
-% through \PassOptionsToPackage instead, which is what removes that clash.
+% Hifenização em português brasileiro. Sem isso o LaTeX hifeniza português com
+% padrões do inglês e quebra palavras em lugares errados - mais visível no resumo
+% profissional justificado, e custa linhas num currículo com limite duro de 2
+% páginas. Remova (ou troque a opção) se o currículo não for em português.
+\usepackage[brazil]{babel}
+% O moderncv carrega o hyperref por conta própria num hook \AtEndPreamble, então o
+% \hypersetup precisa ir num \AtEndPreamble nosso: no moderncv < 2.4 um
+% \usepackage{hyperref} de topo conflita com o \RequirePackage[unicode]{hyperref}
+% da própria classe. A partir da 2.4.0 a classe passa as opções via
+% \PassOptionsToPackage, que é o que elimina esse conflito.
 \AtEndPreamble{\hypersetup{
     colorlinks=true,
     linkcolor=blue,
     filecolor=magenta,
     urlcolor=blue,
-    pdftitle={[YOUR_NAME] - CV},
-    % Keep pdfpagemode=UseNone: this block runs after moderncv's own
-    % \AtEndPreamble (moderncv.cls sets pdfpagemode there), so a FullScreen
-    % value here would win and open every CV in fullscreen presentation mode.
+    pdftitle={[YOUR_NAME] - Currículo},
+    % Mantenha pdfpagemode=UseNone: este bloco roda depois do \AtEndPreamble do
+    % próprio moderncv (moderncv.cls define pdfpagemode lá), então um valor
+    % FullScreen aqui venceria e abriria todo currículo em modo apresentação.
     pdfpagemode=UseNone,
 }}
 \usepackage[scale=0.80]{geometry}
 \usepackage{import}
 
-% personal data
+% dados pessoais
 \name{[First]}{[Last]}
-% If you have no address to list, DELETE this whole line. \address{}{}{} fails
-% with "There's no line here to end" on every moderncv version.
-\address{[Your Address, City, Country]}{}{}
-\phone[mobile]{[+XX XXXXXXXXXX]}
-\email{[your.email@example.com]}
-\extrainfo{\href{[https://linkedin.com/in/your-profile]}{LinkedIn}, \href{[https://github.com/your-username]}{GitHub}}
+% Convenção brasileira: apenas cidade e estado, nunca rua e número - o mesmo PDF
+% circula por muitas empresas. Se não houver o que listar, APAGUE a linha inteira.
+% \address{}{}{} falha com "There's no line here to end" em toda versão do moderncv.
+\address{[Cidade, UF]}{}{}
+\phone[mobile]{[+55 XX XXXXX-XXXX]}
+\email{[seu.email@exemplo.com]}
+\extrainfo{\href{[https://linkedin.com/in/seu-perfil]}{LinkedIn}, \href{[https://github.com/seu-usuario]}{GitHub}}
+% Sem \photo: foto atrapalha a leitura por ATS e não acrescenta nada.
+% Sem CPF, RG, estado civil, idade ou data de nascimento - dado sensível sob a LGPD.
 
 \begin{document}
 
 \makecvtitle
 
 % ============================================================
-%     PROFILE STATEMENT
+%     RESUMO PROFISSIONAL
 % ============================================================
 
 \vspace{6pt}
-\small{[Write a 3-5 line profile statement tailored to the role you're applying for. Focus on what makes you uniquely qualified. Example: "Data scientist with a PhD in [field] and X years of industry experience. Combines deep domain expertise in [domain] with strong applied machine learning and Python development skills. Experienced in developing end-to-end ML pipelines, from data ingestion to stakeholder-facing dashboards."]}
+\small{[Escreva um resumo de 3-5 linhas direcionado à vaga em questão. Foque no que te torna singularmente qualificado. Exemplo: "Cientista de dados com doutorado em [área] e X anos de experiência em indústria. Combina domínio profundo de [domínio] com machine learning aplicado e desenvolvimento em Python. Experiência em pipelines de ML ponta a ponta, da ingestão de dados a dashboards para áreas de negócio."]}
 
 % ============================================================
-%     CORE COMPETENCIES
+%     COMPETÊNCIAS
 % ============================================================
 
-\section{Core Competencies}
+\section{Competências}
 \vspace{1pt}
 \begin{itemize}
 
-\item \textbf{[Skill Category 1]}: [Specific skills, frameworks, tools. Be concrete.]
+\item \textbf{[Categoria de competência 1]}: [Competências, frameworks e ferramentas específicas. Seja concreto.]
 
-\item \textbf{[Skill Category 2]}: [Specific skills, frameworks, tools.]
+\item \textbf{[Categoria de competência 2]}: [Competências, frameworks e ferramentas.]
 
-\item \textbf{[Skill Category 3]}: [Specific skills, frameworks, tools.]
+\item \textbf{[Categoria de competência 3]}: [Competências, frameworks e ferramentas.]
 
-\item \textbf{[Skill Category 4]}: [Domain expertise, methods, approaches.]
+\item \textbf{[Categoria de competência 4]}: [Domínio, métodos, abordagens.]
 
-\item \textbf{[Skill Category 5]}: [Tools, platforms, software.]
+\item \textbf{[Categoria de competência 5]}: [Ferramentas, plataformas, softwares.]
 
 \end{itemize}
 
 % ============================================================
-%     PROFESSIONAL EXPERIENCE
+%     EXPERIÊNCIA PROFISSIONAL
 % ============================================================
 
-\section{Professional Experience}
+\section{Experiência Profissional}
 \vspace{3pt}
 \begin{itemize}
 
-% --- Most Recent Role ---
-\item{\cventry{[YYYY-Present]}{[Job Title]}{[Company]}{[City, Country]}{}{\vspace{1pt}
+% --- Cargo mais recente ---
+\item{\cventry{[AAAA-Atual]}{[Cargo]}{[Empresa]}{[Cidade, UF]}{}{\vspace{1pt}
 \begin{itemize}
-    \item {[Achievement or responsibility 1 - be specific, use numbers where possible]}
-    \item {[Achievement or responsibility 2]}
-    \item {[Achievement or responsibility 3]}
-    \item {[Achievement or responsibility 4]}
+    \item {[Realização ou responsabilidade 1 - seja específico, use números quando possível]}
+    \item {[Realização ou responsabilidade 2]}
+    \item {[Realização ou responsabilidade 3]}
+    \item {[Realização ou responsabilidade 4]}
 \end{itemize}}}
 
 \vspace{3pt}
 
-% --- Previous Role ---
-\item{\cventry{[YYYY-YYYY]}{[Job Title]}{[Company]}{[City, Country]}{}{\vspace{1pt}
+% --- Cargo anterior ---
+\item{\cventry{[AAAA-AAAA]}{[Cargo]}{[Empresa]}{[Cidade, UF]}{}{\vspace{1pt}
 \begin{itemize}
-    \item {[Achievement or responsibility 1]}
-    \item {[Achievement or responsibility 2]}
-    \item {[Achievement or responsibility 3]}
+    \item {[Realização ou responsabilidade 1]}
+    \item {[Realização ou responsabilidade 2]}
+    \item {[Realização ou responsabilidade 3]}
 \end{itemize}}}
 
 \vspace{3pt}
 
-% --- Earlier Role ---
-\item{\cventry{[YYYY-YYYY]}{[Job Title]}{[Company]}{[City, Country]}{}{\vspace{1pt}
+% --- Cargo mais antigo ---
+\item{\cventry{[AAAA-AAAA]}{[Cargo]}{[Empresa]}{[Cidade, UF]}{}{\vspace{1pt}
 \begin{itemize}
-    \item {[Achievement or responsibility 1]}
-    \item {[Achievement or responsibility 2]}
+    \item {[Realização ou responsabilidade 1]}
+    \item {[Realização ou responsabilidade 2]}
 \end{itemize}}}
 
 \end{itemize}
 
 % ============================================================
-%     EDUCATION
+%     FORMAÇÃO ACADÊMICA
 % ============================================================
 
-\section{Education}
+\section{Formação Acadêmica}
 \vspace{1pt}
 \begin{itemize}
 
-\item{\cventry{[YYYY-YYYY]}{[Degree] in [Field]}{[Institution]}{[City, Country]}{}{\vspace{1pt}
-Thesis: ``[Thesis Title].'' [Brief description of research focus.]
+\item{\cventry{[AAAA-AAAA]}{[Grau] em [Área]}{[Instituição]}{[Cidade, UF]}{}{\vspace{1pt}
+TCC/Dissertação: ``[Título do trabalho].'' [Breve descrição do foco da pesquisa.]
 }}
 
 \vspace{3pt}
 
-\item{\cventry{[YYYY-YYYY]}{[Degree] in [Field]}{[Institution]}{[City, Country]}{}{\vspace{1pt}
-[Brief description or key topics.]
+\item{\cventry{[AAAA-AAAA]}{[Grau] em [Área]}{[Instituição]}{[Cidade, UF]}{}{\vspace{1pt}
+[Breve descrição ou temas principais.]
 }}
 
 \end{itemize}
 
 % ============================================================
-%     LANGUAGES
+%     IDIOMAS
 % ============================================================
 
-\section{Languages}
+\section{Idiomas}
 \vspace{1pt}
 \begin{itemize}
-\item {[Language 1] (native), [Language 2] (fluent), [Language 3] (intermediate).}
+\item {Português (nativo), [Idioma 2] ([nível]), [Idioma 3] ([nível]).}
 \end{itemize}
 
 % ============================================================
-%     PUBLICATIONS (optional)
+%     PUBLICAÇÕES (opcional)
 % ============================================================
 
-\section{Publications}
+\section{Publicações}
 \vspace{1pt}
 \begin{itemize}
-\item {[Author(s)] ([Year]). [Title]. [Journal/Conference]. \href{[DOI_URL]}{DOI link}}
+\item {[Autor(es)] ([Ano]). [Título]. [Periódico/Congresso]. \href{[URL_DOI]}{link DOI}}
 \end{itemize}
 
 % ============================================================
-%     HONORS AND AWARDS (optional)
+%     PRÊMIOS E RECONHECIMENTOS (opcional)
 % ============================================================
 
-\section{Honors and Awards}
+\section{Prêmios e Reconhecimentos}
 \vspace{1pt}
 \begin{itemize}
-\item{\textbf{[Award Name]} -- [Event/Organization] ([Year]).}
+\item{\textbf{[Nome do prêmio]} -- [Evento/Organização] ([Ano]).}
 \end{itemize}
 
 % ============================================================
-%     REFERENCES
+%     REFERÊNCIAS
 % ============================================================
 
-\section{References}
+\section{Referências}
 \vspace{1pt}
 \begin{itemize}
-\item{Available upon request.}
+\item{Disponíveis mediante solicitação.}
 \end{itemize}
 
 \end{document}

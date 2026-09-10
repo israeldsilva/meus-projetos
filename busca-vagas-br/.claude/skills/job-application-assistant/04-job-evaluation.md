@@ -46,6 +46,42 @@ Judge the level comparison the same way you judge everything else in this framew
 
 **Worked example:** a candidate whose Languages table lists Spanish (Native) and English (B1/B2). A posting requiring "fluent Russian" → **FAIL**, Russian isn't declared at all. A posting requiring "fluent English" → **FLAG**, English is declared but "fluent" plausibly exceeds B1/B2 — score and draft the application, but tell the candidate this posting's bar may be a stretch and let them decide. A posting requiring "conversational English" or unspecified English → **PASS**, B1/B2 clears a "conversational" bar cleanly.
 
+**Brazilian market note.** In practice this gate is almost always about English. The labels used in Brazilian postings are not interchangeable, and the difference decides whether a candidate is eliminated in round one: *"inglês para leitura"* / *"inglês técnico"* (reads documentation) is a low bar; *"inglês intermediário"* means occasional meetings and async writing; *"inglês avançado/fluente"* means a daily meeting in English and is usually eliminating in fact, whatever the ad's tone suggests. A posting written entirely in English by a foreign employer is a hard requirement even when it never states one — treat it as a stated requirement, not as an ad that merely happens to be in English.
+
+## Contract & Modality Gate — run before scoring
+
+Brazil's decisive axes are rarely work authorization; they are **how you are hired** and **where you work from**. Both are declared under "Condições de trabalho" in CLAUDE.md, both behave like the gates above (veto before scoring, not a scoring penalty), and both are frequently absent from the posting. `/rank` records the verdict as `location_verdict`, the same field the Location Gate already uses.
+
+### Contract regime (regime de contratação)
+
+Compare the posting's stated regime against the candidate's accepted regimes:
+
+| Posting vs. accepted regimes | Verdict |
+|---|---|
+| States a regime the candidate **does not accept** (e.g. PJ-only where the profile accepts CLT only) | **FAIL — hard stop.** Do not score, do not draft. Quote the wording. |
+| States a regime the candidate accepts | **PASS.** |
+| **Silent on regime** | **PROCEED, marked unverified.** Never infer it. Surface it as the first question to ask the recruiter. |
+
+Silence is the common case, not the exception, and it is not evidence of CLT. Startups and consultancies default to PJ without saying so; a posting that mentions "benefícios flexíveis" or "caixinha" rather than *vale-refeição*, *plano de saúde* and *13º* is usually describing a PJ arrangement.
+
+**Never compare a PJ gross figure against a CLT gross figure.** They are not the same unit. A PJ rate has to absorb INSS, accountant fees, unpaid vacation, and the 13th salary the CLT figure already includes; the rule of thumb in the market is that PJ needs to be roughly 20-30% higher to land at the same net, and the exact number depends on the candidate's tax regime (Simples Nacional faixa, whether they have an existing CNPJ). When a comparison matters, state the assumptions rather than producing a single confident number.
+
+### Work modality (modalidade)
+
+| Posting vs. accepted modality | Verdict |
+|---|---|
+| States a modality the candidate does not accept (fully on-site where the profile is remote-only) | **FAIL — hard stop.** |
+| Hybrid where the candidate accepts hybrid, but the **days on site exceed** what they declared | **FLAG, then proceed.** A "hybrid" role at 4 days on site is on-site in everything but name. |
+| States an accepted modality, or is remote with no location constraint | **PASS.** |
+| Silent, or says "remoto" with a city attached | **PROCEED, marked unverified.** |
+
+Two traps worth checking explicitly, because both are common and neither shows up in a search-result card:
+
+1. **"Remote" postings that carry a head-office city.** A listing showing "São Paulo, SP" may be fully remote, hybrid, or on-site — the location field on a job card frequently reflects where the company is, not where the work happens. Confirm in the posting detail before scoring it as remote.
+2. **"Remoto" that means "remote with occasional travel".** Frequently stated only deep in the description, and "pontualmente" can mean anything from twice a year to twice a month. Ask.
+
+For international remote roles hiring from Brazil, run the Eligibility Gate above as well — many "remote worldwide" postings exclude South America in the fine print, or require an entity/contract the candidate cannot provide. That exclusion is a FAIL, and it is usually written down somewhere in the posting.
+
 ## Scoring Dimensions
 
 Evaluate each job posting against these five dimensions:
@@ -96,6 +132,8 @@ Does the role and company culture match the behavioral profile?
 - Requires relocation: FAIL (deal-breaker)
 - Frequent international travel: FLAG (discuss with user)
 
+The Contract & Modality Gate above has already vetoed the hard mismatches; what remains here is the commute itself. Judge it in **time, not distance** — 25 km in São Paulo, Rio or Belo Horizonte at 8am is a different commute from 25 km anywhere else, and the number the candidate declared in their profile is a time budget. When a posting names a neighbourhood rather than a city (Faria Lima, Porto Digital, Barra da Tijuca), that is the commute to reason about, not the city centroid.
+
 ### 5. Career Alignment & Motivation (0-100)
 Does this role advance career goals and contain tasks that energize?
 
@@ -142,6 +180,18 @@ Present findings as:
 Interpret results relative to the baseline defined in the data file's metadata. For index-based data, higher typically means above-market compensation.
 
 If the salary tool is not configured, skip this section.
+
+**Building the dataset for Brazil.** There is no single public salary registry to point the tool at, so `salary_data.json` is assembled from whatever sources the candidate trusts. The ones worth combining:
+
+- **salario.com.br** — derived from CAGED/RAIS, the government's own employment records, indexed by CBO occupation code. The most defensible floor for a CLT role, and the only source here grounded in filed data rather than self-reporting.
+- **Glassdoor Brasil** and **Vagas.com/Catho salary tools** — self-reported, so skewed upward and thin outside São Paulo. Useful for ranges, weak for medians.
+- **Annual salary guides from recruiters** (Robert Half, Michael Page, PageGroup, Talenses) — segmented by seniority and region, published as PDFs; the best source for senior and specialist roles that barely appear in the self-reported datasets.
+- **Community surveys** — for tech specifically, the yearly *Pesquisa Salarial* run by developer communities tends to be closer to reality on PJ rates than any of the above.
+
+Two things to hold onto whenever a number is produced:
+
+1. **State the regime.** A figure without CLT or PJ attached is meaningless — see the Contract & Modality Gate above. Never compare across regimes without converting, and never present a converted figure as if it were observed.
+2. **Salary data ages badly here.** Brazilian nominal salaries move with inflation and with each *dissídio* (the annual collective-bargaining adjustment, which differs by union and category), so a figure more than a year old understates the current market. Record the reference date in the data file's metadata and say the date out loud when presenting a benchmark.
 
 ## Output Format
 

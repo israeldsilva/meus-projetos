@@ -68,9 +68,18 @@ The font wrapper is mandatory — if you just move `\begin{itemize}` outside `\l
 \pagestyle{fancy}
 \fancyhf{}
 
-\rfoot{Page \thepage \hspace{0pt}}
+\rfoot{P\'agina \thepage \hspace{0pt}}
 \thispagestyle{empty}
 \renewcommand{\headrulewidth}{0pt}
+
+% Data por extenso em portugu\^es, sem depender do babel: cover.cls carrega
+% xltxtra/xunicode, cujos shorthands conflitam com os do babel-portuges, e o
+% corpo inteiro \'e \raggedright, ent\~ao hifeniza\c{c}\~ao n\~ao muda o resultado.
+\newcommand{\dataporextenso}{%
+  \number\day\ de \ifcase\month\or janeiro\or fevereiro\or mar\c{c}o\or abril\or
+  maio\or junho\or julho\or agosto\or setembro\or outubro\or novembro\or
+  dezembro\fi\ de \number\year}
+
 \begin{document}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -83,30 +92,30 @@ The font wrapper is mandatory — if you just move `\begin{itemize}` outside `\l
 %     MAIN COVER LETTER CONTENT
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\currentdate{\today}
-\lettercontent{Dear [Name/Team],}
+\currentdate{\dataporextenso}
+\lettercontent{Prezada equipe de recrutamento,}
 
-\lettercontent{[Opening paragraph - role, connection to background, 2-3 sentences]}
+\lettercontent{[Par\'agrafo de abertura - vaga, conex\~ao com sua traget\'oria, 2-3 frases]}
 
-\lettercontent{[Body paragraph - most relevant experience, introducing the bullet list]}
+\lettercontent{[Par\'agrafo de desenvolvimento - experi\^encia mais relevante, introduzindo a lista]}
 
 {\raggedright\fontspec[Path = OpenFonts/fonts/raleway/]{Raleway-Medium}\fontsize{11pt}{13pt}\selectfont
 \begin{itemize}
-    \item {[Concrete achievement/skill 1]}
-    \item {[Concrete achievement/skill 2]}
-    \item {[Concrete achievement/skill 3]}
+    \item {[Realiza\c{c}\~ao ou compet\^encia concreta 1]}
+    \item {[Realiza\c{c}\~ao ou compet\^encia concreta 2]}
+    \item {[Realiza\c{c}\~ao ou compet\^encia concreta 3]}
 \end{itemize}\par}
 
-\lettercontent{[Connection to company - why this role, why this company specifically]}
+\lettercontent{[Conex\~ao com a empresa - por que esta vaga, por que esta empresa especificamente]}
 
-\lettercontent{[Personal fit paragraph - behavioral strengths, team contribution, 2-3 sentences]}
+\lettercontent{[Par\'agrafo de ader\^encia pessoal - pontos fortes comportamentais, contribui\c{c}\~ao ao time, 2-3 frases]}
 
-\lettercontent{I look forward to hearing from you.}
+\lettercontent{Fico \`a disposi\c{c}\~ao para conversarmos.}
 
 \begin{flushright}
 % No trailing \\ inside \closing{} - cover.cls appends its own \\, and a
 % doubled break triggers "! LaTeX Error: There's no line here to end."
-\closing{Kind regards,}
+\closing{Atenciosamente,}
 
 \signature{[YOUR_NAME]}
 \end{flushright}
@@ -118,17 +127,25 @@ The font wrapper is mandatory — if you just move `\begin{itemize}` outside `\l
 | Command | Purpose |
 |---------|---------|
 | `\namesection{}{Name}{contact info}` | Header with name and contact |
-| `\currentdate{date}` | Date field (use `\today` or explicit date) |
+| `\currentdate{date}` | Date field (use `\dataporextenso`, or an explicit date) |
 | `\lettercontent{text}` | Body paragraph (adds spacing after) |
 | `\closing{text}` | Closing line |
 | `\signature{name}` | Printed name below signature |
 
 ## Tailoring Guidelines
 
-### Salutation
-- If you know the hiring manager's name: "Dear [First Last],"
-- If you know the team: "Dear [Company] hiring team,"
-- Generic: "Dear [Company]," (avoid "To whom it may concern")
+### Salutation (Brazilian Portuguese)
+- When you know the hiring manager's name: `Prezado(a) [Nome],` — or `Ol\'a, [Nome],` when the company's own tone is informal (startups, most tech)
+- When you know the team: `Prezada equipe de [Empresa],`
+- Generic default: `Prezada equipe de recrutamento,`
+- **Avoid** `A quem possa interessar` — it reads as a form letter, which is exactly what this document is meant not to be.
+
+Match the register to the employer. A bank, a law firm or a public-sector employer expects `Prezado(a)` and `Atenciosamente`; a startup that writes its own postings in the second person will read that as stiff, and `Ol\'a` with a warmer closing lands better. When in doubt, stay formal — it is the safer failure.
+
+### Closing
+- Default: `Atenciosamente,`
+- Slightly warmer, still professional: `Cordialmente,`
+- **Avoid** `Abra\c{c}os` and other informal sign-offs, even at a startup.
 
 ### Length - Hard 1-Page Limit
 - Target: 1 page including signature block

@@ -42,6 +42,12 @@ Expected output: `Output written on main_<company>_<role>.pdf (2 pages, ...)`. A
 \renewcommand*{\sectionstyle}[1]{{\sectionfont\color{color1}#1}}
 
 \usepackage[utf8]{inputenc}
+% Brazilian Portuguese hyphenation. Without it LaTeX hyphenates Portuguese with
+% English patterns and breaks words in the wrong places - most visible in the
+% justified profile statement, and it costs lines on a CV with a hard 2-page
+% budget. Drop this line (or switch the option) when the CV language is not
+% Portuguese; see "Section headings must match the CV's language" below.
+\usepackage[brazil]{babel}
 % moderncv loads hyperref itself in an \AtEndPreamble hook, so \hypersetup
 % must go in an \AtEndPreamble of our own: on moderncv < 2.4 a top-level
 % \usepackage{hyperref} clashes with the class's own
@@ -116,7 +122,22 @@ Two related patterns are fine and should be kept:
 
 ### Section headings must match the CV's language (important)
 
-Section headings such as `\section{Core Competencies}`, `Professional Experience`, `Education`, `Languages`, `Publications`, `Honors and Awards`, `References` (and any others your template defines), plus the `Available upon request.` line under References, are all **literal English text baked into the template** - they do not translate themselves. Whenever the CV language (see `CV language` in the candidate profile) is not English, translate every one of these too, whatever they are, not just the body prose - a CV with a fully localized profile statement and bullets sitting under untouched English section headers reads as sloppy and inconsistent, and it's an easy thing to forget precisely because the prose translation is the obvious, visible part of the job. Worked example for Spanish: `Competencias Clave`, `Experiencia Profesional`, `Educaci\'on`, `Idiomas`, `Publicaciones`, `Distinciones y Premios`, `Referencias`, `Disponibles a solicitud.` The same rule applies for any other target language - check this explicitly during the verification pass.
+Section headings such as `\section{Core Competencies}`, `Professional Experience`, `Education`, `Languages`, `Publications`, `Honors and Awards`, `References` (and any others your template defines), plus the `Available upon request.` line under References, are all **literal English text baked into the template** - they do not translate themselves. Whenever the CV language (see `CV language` in the candidate profile) is not English, translate every one of these too, whatever they are, not just the body prose - a CV with a fully localized profile statement and bullets sitting under untouched English section headers reads as sloppy and inconsistent, and it's an easy thing to forget precisely because the prose translation is the obvious, visible part of the job.
+
+**Worked example for Brazilian Portuguese** (the default here): `Resumo Profissional`, `Compet\^encias`, `Experi\^encia Profissional`, `Forma\c{c}\~ao Acad\^emica`, `Idiomas`, `Publica\c{c}\~oes`, `Pr\^emios e Reconhecimentos`, `Refer\^encias`, `Dispon\'iveis mediante solicita\c{c}\~ao.` Two things move with the headings: the `\usepackage[brazil]{babel}` line in the preamble (drop or switch it when the CV is not in Portuguese), and the accents themselves - see LaTeX Special Characters below, since a CV whose accents are dropped loses the exact keywords an ATS is matching on.
+
+The same rule applies for any other target language - check this explicitly during the verification pass.
+
+### Brazilian CV conventions
+
+These are conventions of the market, not of the template, and they differ from what several CV builders still produce locally. The full checklist lives in `CLAUDE.md` under "Convenções brasileiras de currículo"; the ones that touch the LaTeX directly:
+
+- **No photo.** `moderncv`'s `\photo{}` command stays unused. A photo defeats ATS parsing and adds nothing.
+- **No CPF, RG, marital status, age or date of birth.** They are sensitive data under the LGPD, no ATS needs them at this stage, and some of them invite bias in screening.
+- **`\address{}` carries city and state only** - `\address{São Paulo, SP}{}{}`, never street and number. The same PDF goes to many employers.
+- **No salary expectation in the CV.** It belongs in the application form's own field; the candidate's range lives in the profile under "Condições de trabalho".
+- **`\phone[mobile]{+55 11 99999-9999}`** - keep the `+55`, which costs nothing domestically and is required the moment the posting is international.
+- Job titles that the market itself uses in English (`Product Owner`, `Tech Lead`, `Scrum Master`) stay in English even in a Portuguese CV; translating them reads as artificial. Everything around them is translated.
 
 ## Section-by-Section Tailoring
 
@@ -217,15 +238,21 @@ Postings and profile data arrive as plain text; the CV is LaTeX. Escape these wh
 
 | Character | Write | Typical trigger |
 |---|---|---|
-| `&` | `\&` | company names: Bang \& Olufsen, Brüel \& Kjær, H\&M |
-| `%` | `\%` | quantified achievements: "cut latency by 40\%" |
+| `&` | `\&` | company names: Lojas Americanas \& Cia, H\&M, AT\&T |
+| `%` | `\%` | quantified achievements: "reduzi a latência em 40\%" |
 | `$` | `\$` | salary and cost figures |
 | `#` | `\#` | "ranked \#1", C\# |
 | `_` | `\_` | file names, code identifiers |
 | `~` | `\textasciitilde{}` | URLs, "approx. 5 years" tildes |
 | `^` | `\textasciicircum{}` | version strings, math |
 
-Two failure modes deserve special care:
+**Accented characters are the Brazilian equivalent of the `%` trap.** UTF-8 accents (`ção`, `ê`, `ã`, `í`) compile fine under lualatex/xelatex with the template as given, so nothing warns you when they go wrong — the damage shows up only in the PDF's *text layer*, which is what an ATS reads. A CV whose extraction returns `Gestao de Projetos` instead of `Gestão de Projetos` has silently lost the exact keyword the parser was matching on, and the rendered page looks perfect. So:
+
+- Write accents as literal UTF-8 in body text; the template's `inputenc`/`babel` setup handles them.
+- Use the escaped forms (`\c{c}`, `\~a`, `\^e`, `\'i`) when you need certainty — section headings are the place it matters most, since they anchor the parser's section detection.
+- **Always confirm in the extraction, never in the rendered page**: `python tools/verify_pdf.py <pdf> --dump-text <txt>` and read the result. This is the single most likely defect in a Portuguese CV and the compile loop cannot catch it.
+
+Two further failure modes deserve special care:
 
 - **`%` fails silently.** An unescaped `%` starts a LaTeX comment: the compile succeeds with zero errors, and everything after the `%` on that line vanishes from the PDF. `Cut inference latency by 40% and saved DKK 2M annually` renders as "Cut inference latency by 40" - the bullet keeps its impressive-looking fragment and loses the actual result. Quantified achievement bullets are exactly where the guidance steers you ("use numbers where possible"), so check every `%` in every bullet before compiling.
 - **`&` fails loudly** inside `\cventry` (alignment-tab errors, `Missing } inserted`). The compile loop catches it, but escape employer names up front rather than debugging the compile.

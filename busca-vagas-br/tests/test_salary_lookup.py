@@ -11,7 +11,7 @@ import salary_lookup
 from salary_lookup import (
     format_entry,
     normalize,
-    anglicize,
+    strip_accents,
     extract_core_words,
     match_score,
     search_company,
@@ -122,24 +122,23 @@ class FormatEntryTests(unittest.TestCase):
 
 class TestMatchScoreExactMatch(unittest.TestCase):
     def test_exact_match_returns_100(self):
-        self.assertEqual(match_score("Novo Nordisk", "Novo Nordisk"), 100)
+        self.assertEqual(match_score("Magazine Luiza", "Magazine Luiza"), 100)
 
     def test_exact_match_case_insensitive(self):
-        self.assertEqual(match_score("NOVO NORDISK", "Novo Nordisk"), 100)
+        self.assertEqual(match_score("MAGAZINE LUIZA", "Magazine Luiza"), 100)
 
     def test_exact_match_after_suffix_stripping(self):
-        self.assertEqual(match_score("Mærsk", "Mærsk A/S"), 100)
+        self.assertEqual(match_score("Ambev", "Ambev S.A."), 100)
 
-    def test_exact_match_after_dotted_amba_suffix_stripping(self):
-        # "A.M.B.A." (dotted) is the same legal-suffix family as the
-        # undotted "amba" pattern above it in STRIP_PATTERNS and must
-        # strip just as cleanly.
-        self.assertEqual(match_score("Arla Foods", "Arla Foods A.M.B.A."), 100)
+    def test_exact_match_after_dotted_sa_suffix_stripping(self):
+        # "S.A." (dotted) is the same legal-suffix family as the undotted
+        # "SA" pattern in STRIP_PATTERNS and must strip just as cleanly.
+        self.assertEqual(match_score("Vale", "Vale S.A."), 100)
 
 
 class TestMatchScoreSubstring(unittest.TestCase):
     def test_query_contained_in_entry_gives_high_score(self):
-        score = match_score("Carlsberg", "Carlsberg Danmark A/S")
+        score = match_score("Ambev", "Ambev Brasil S.A.")
         self.assertGreaterEqual(score, 80)
 
     def test_entry_contained_in_query_gives_high_score(self):
@@ -158,27 +157,27 @@ class TestMatchScoreShortQuery(unittest.TestCase):
 
 
 class TestMatchScoreAnglicize(unittest.TestCase):
-    def test_oe_variant_matches_o_with_slash(self):
-        score = match_score("Maersk", "Mærsk A/S")
+    def test_unaccented_query_matches_accented_entry(self):
+        score = match_score("Telefonica", "Telefônica S.A.")
         self.assertGreater(score, 0)
 
-    def test_aa_variant_matches_aa(self):
-        self.assertEqual(match_score("Aarsleff", "Aarsleff"), 100)
+    def test_unaccented_name_matches_itself(self):
+        self.assertEqual(match_score("Gerdau", "Gerdau"), 100)
 
-    def test_danish_characters_roundtrip(self):
-        score = match_score("Maersk", "Mærsk A/S")
+    def test_accented_characters_roundtrip(self):
+        score = match_score("Perdigao", "Perdigão S.A.")
         self.assertGreater(score, 0)
 
 
 class TestMatchScoreNoOverlap(unittest.TestCase):
     def test_completely_unrelated_names_return_zero(self):
-        self.assertEqual(match_score("Apple", "Vestas Wind Systems"), 0)
+        self.assertEqual(match_score("Apple", "Embraer"), 0)
 
     def test_empty_query_returns_zero(self):
-        self.assertEqual(match_score("", "Novo Nordisk"), 0)
+        self.assertEqual(match_score("", "Magazine Luiza"), 0)
 
     def test_empty_entry_returns_zero(self):
-        self.assertEqual(match_score("Novo Nordisk", ""), 0)
+        self.assertEqual(match_score("Magazine Luiza", ""), 0)
 
 
 # ---------------------------------------------------------------------------
@@ -425,45 +424,47 @@ class NullShapeEndToEndTests(unittest.TestCase):
 
 class UtilityTests(unittest.TestCase):
     def test_normalize_strips_suffix_and_noise(self):
-        self.assertEqual(normalize("Novo Nordisk A/S"), "novonordisk")
-        self.assertEqual(normalize("Ørsted (VG) Holding"), "ørsted")
-        self.assertEqual(normalize("Chr. Hansen, Denmark Division"), "chrhansen")
-        self.assertEqual(normalize("Simple Corp ApS"), "simplecorp")
+        self.assertEqual(normalize("Magazine Luiza S.A."), "magazineluiza")
+        self.assertEqual(normalize("Telefônica (VG) Holding"), "telefônica")
+        self.assertEqual(normalize("Itaú Unibanco, Divisão Digital"), "itaúunibanco")
+        self.assertEqual(normalize("Simple Corp Ltda"), "simplecorp")
 
-    def test_normalize_strips_dotted_amba_suffix_same_as_undotted(self):
-        # The dotted form ("A.M.B.A.") must normalize identically to the
-        # undotted form ("amba"), same as A/S vs ApS variants above.
-        self.assertEqual(
-            normalize("Arla Foods A.M.B.A."), normalize("Arla Foods amba")
-        )
-        self.assertEqual(normalize("Arla Foods A.M.B.A."), "arlafoods")
+    def test_normalize_strips_dotted_sa_suffix_same_as_undotted(self):
+        # The dotted form ("S.A.") must normalize identically to the
+        # undotted form ("SA"), same as the Ltda variants above.
+        self.assertEqual(normalize("Vale S.A."), normalize("Vale SA"))
+        self.assertEqual(normalize("Vale S.A."), "vale")
 
-    def test_anglicize_replaces_danish_chars(self):
-        self.assertEqual(anglicize("ørsted"), "orsted")
-        self.assertEqual(anglicize("mærsk"), "maersk")
-        self.assertEqual(anglicize("ålborg"), "aalborg")
+    def test_strip_accents_replaces_portuguese_chars(self):
+        self.assertEqual(strip_accents("telefônica"), "telefonica")
+        self.assertEqual(strip_accents("perdigão"), "perdigao")
+        self.assertEqual(strip_accents("boticário"), "boticario")
+        self.assertEqual(strip_accents("cosméticos"), "cosmeticos")
 
     def test_extract_core_words(self):
-        self.assertEqual(extract_core_words("Novo Nordisk A/S"), ["novo", "nordisk"])
-        self.assertEqual(extract_core_words("A/S"), [])
+        self.assertEqual(extract_core_words("Magazine Luiza S.A."), ["magazine", "luiza"])
+        self.assertEqual(extract_core_words("Ltda"), [])
         self.assertEqual(extract_core_words("Test Company (Sub-entity)"), ["test", "company"])
 
 
 class MatchScoreTests(unittest.TestCase):
     def test_exact_match_score(self):
-        self.assertEqual(match_score("Novo Nordisk", "Novo Nordisk"), 100)
-        self.assertEqual(match_score("novo nordisk", "Novo Nordisk A/S"), 100)
+        self.assertEqual(match_score("Magazine Luiza", "Magazine Luiza"), 100)
+        self.assertEqual(match_score("magazine luiza", "Magazine Luiza S.A."), 100)
 
     def test_partial_match_score(self):
-        self.assertGreater(match_score("Novo", "Novo Nordisk A/S"), 80)
-        self.assertEqual(match_score("Novo Nordisk", "Novo"), 75)
+        self.assertGreater(match_score("Magazine", "Magazine Luiza S.A."), 80)
+        # A short entry that is only a small fraction of the query drops out of
+        # the substring branch and is confirmed by word overlap instead, so it
+        # scores below a plain containment match.
+        self.assertEqual(match_score("Vale do Rio Doce", "Vale"), 75)
 
-    def test_anglicized_match_score(self):
-        self.assertEqual(match_score("Orsted", "Ørsted A/S"), 85)
+    def test_unaccented_match_score(self):
+        self.assertEqual(match_score("Telefonica", "Telefônica S.A."), 85)
 
     def test_overlap_match_score(self):
         # Overlap of multiple words
-        self.assertGreater(match_score("Novo Tech", "Novo Nordisk Tech A/S"), 30)
+        self.assertGreater(match_score("Novo Tech", "Magazine Luiza Tech A/S"), 30)
 
     def test_no_match_score(self):
         self.assertEqual(match_score("Google", "Microsoft"), 0)
@@ -473,32 +474,32 @@ class SearchCompanyRefactoredTests(unittest.TestCase):
     def setUp(self):
         self.data = {
             "companies": [
-                {"company": "Novo Nordisk A/S", "city": "Bagsværd"},
+                {"company": "Magazine Luiza S.A.", "city": "Franca"},
                 {"company": "Ørsted", "city": "Fredericia"},
                 {"company": "Vestas Wind Systems", "city": "Aarhus"},
             ]
         }
 
     def test_search_by_name(self):
-        results = search_company(self.data, "Novo")
+        results = search_company(self.data, "Magazine")
         self.assertEqual(len(results), 1)
-        self.assertEqual(results[0]["company"], "Novo Nordisk A/S")
+        self.assertEqual(results[0]["company"], "Magazine Luiza S.A.")
 
     def test_search_with_city_filter(self):
         results = search_company(self.data, "Ørsted", city="Fredericia")
         self.assertEqual(len(results), 1)
 
         # Mismatching city
-        results_wrong_city = search_company(self.data, "Ørsted", city="Bagsværd")
+        results_wrong_city = search_company(self.data, "Ørsted", city="Franca")
         self.assertEqual(len(results_wrong_city), 0)
 
 
 class TestSearchCompanyBasicMatch(unittest.TestCase):
     def test_exact_name_returns_match(self):
-        data = _make_data(_entry("Novo Nordisk", "Bagsværd"))
-        results = search_company(data, "Novo Nordisk")
+        data = _make_data(_entry("Magazine Luiza", "Franca"))
+        results = search_company(data, "Magazine Luiza")
         self.assertEqual(len(results), 1)
-        self.assertEqual(results[0]["company"], "Novo Nordisk")
+        self.assertEqual(results[0]["company"], "Magazine Luiza")
 
     def test_no_match_returns_empty_list(self):
         data = _make_data(_entry("Vestas Wind Systems", "Aarhus"))
@@ -521,50 +522,50 @@ class TestSearchCompanyBasicMatch(unittest.TestCase):
 class TestSearchCompanyCityFilter(unittest.TestCase):
     def test_matching_city_is_included(self):
         data = _make_data(
-            _entry("Novo Nordisk", "Bagsværd"),
-            _entry("Novo Nordisk", "Aarhus"),
+            _entry("Magazine Luiza", "Franca"),
+            _entry("Magazine Luiza", "Aarhus"),
         )
-        results = search_company(data, "Novo Nordisk", city="Aarhus")
+        results = search_company(data, "Magazine Luiza", city="Aarhus")
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]["city"], "Aarhus")
 
     def test_non_matching_city_is_excluded(self):
-        data = _make_data(_entry("Novo Nordisk", "Bagsværd"))
-        results = search_company(data, "Novo Nordisk", city="Odense")
+        data = _make_data(_entry("Magazine Luiza", "Franca"))
+        results = search_company(data, "Magazine Luiza", city="Odense")
         self.assertEqual(results, [])
 
     def test_no_city_filter_returns_all_cities(self):
         data = _make_data(
-            _entry("Novo Nordisk", "Bagsværd"),
-            _entry("Novo Nordisk", "Aarhus"),
+            _entry("Magazine Luiza", "Franca"),
+            _entry("Magazine Luiza", "Aarhus"),
         )
-        results = search_company(data, "Novo Nordisk")
+        results = search_company(data, "Magazine Luiza")
         self.assertEqual(len(results), 2)
 
     def test_city_filter_case_insensitive(self):
-        data = _make_data(_entry("Novo Nordisk", "København"))
-        results = search_company(data, "Novo Nordisk", city="københavn")
+        data = _make_data(_entry("Magazine Luiza", "São Paulo"))
+        results = search_company(data, "Magazine Luiza", city="SÃO PAULO")
         self.assertEqual(len(results), 1)
 
-    def test_anglicized_city_matches_danish_city(self):
-        data = _make_data(_entry("Novo Nordisk", "København"))
-        results = search_company(data, "Novo Nordisk", city="kobenhavn")
+    def test_unaccented_city_matches_accented_city(self):
+        data = _make_data(_entry("Magazine Luiza", "São Paulo"))
+        results = search_company(data, "Magazine Luiza", city="sao paulo")
         self.assertEqual(len(results), 1)
 
 
 class TestSearchCompanyScoreThreshold(unittest.TestCase):
     def test_low_score_matches_excluded(self):
-        data = _make_data(_entry("Novo Nordisk", "Bagsværd"))
+        data = _make_data(_entry("Magazine Luiza", "Franca"))
         results = search_company(data, "xyz")
         self.assertEqual(results, [])
 
     def test_results_sorted_by_relevance_descending(self):
         data = _make_data(
-            _entry("Novo Nordisk International", "Bagsværd"),
-            _entry("Novo Nordisk", "Bagsværd"),
+            _entry("Magazine Luiza International", "Franca"),
+            _entry("Magazine Luiza", "Franca"),
         )
-        results = search_company(data, "Novo Nordisk")
-        self.assertEqual(results[0]["company"], "Novo Nordisk")
+        results = search_company(data, "Magazine Luiza")
+        self.assertEqual(results[0]["company"], "Magazine Luiza")
 
 
 if __name__ == "__main__":

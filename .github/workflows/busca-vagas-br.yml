@@ -104,27 +104,27 @@ jobs:
       - name: Compilar CV de exemplo (lualatex)
         run: |
           cd cv
-          lualatex -interaction=nonstopmode -halt-on-error main_exemplo.tex
-          test -f main_exemplo.pdf
-          if grep -q '^!' main_exemplo.log; then
-            echo '::error::lualatex reportou erros ao compilar cv/main_exemplo.tex'
-            grep -A3 '^!' main_exemplo.log
+          lualatex -interaction=nonstopmode -halt-on-error main_example.tex
+          test -f main_example.pdf
+          if grep -q '^!' main_example.log; then
+            echo '::error::lualatex reportou erros ao compilar cv/main_example.tex'
+            grep -A3 '^!' main_example.log
             exit 1
           fi
       - name: Compilar carta de exemplo (xelatex)
         run: |
           cd cover_letters
-          xelatex -interaction=nonstopmode -halt-on-error carta_exemplo.tex
-          test -f carta_exemplo.pdf
-          if grep -q '^!' carta_exemplo.log; then
-            echo '::error::xelatex reportou erros ao compilar cover_letters/carta_exemplo.tex'
-            grep -A3 '^!' carta_exemplo.log
+          xelatex -interaction=nonstopmode -halt-on-error cover_example.tex
+          test -f cover_example.pdf
+          if grep -q '^!' cover_example.log; then
+            echo '::error::xelatex reportou erros ao compilar cover_letters/cover_example.tex'
+            grep -A3 '^!' cover_example.log
             exit 1
           fi
       - name: Verificar camada de texto extraível
         run: |
-          python3 tools/verify_pdf.py cv/main_exemplo.pdf --min-chars 100
-          python3 tools/verify_pdf.py cover_letters/carta_exemplo.pdf --min-chars 100
+          python3 tools/verify_pdf.py cv/main_example.pdf --min-chars 100
+          python3 tools/verify_pdf.py cover_letters/cover_example.pdf --min-chars 100
 
   discover-clis:
     # A matriz é descoberta, não fixa, para que um CLI de portal adicionado via
