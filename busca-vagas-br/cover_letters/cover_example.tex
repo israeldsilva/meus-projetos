@@ -1,0 +1,73 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Carta de apresentação - [Empresa], [Cargo]
+%
+% Carta de exemplo com conteúdo placeholder. É a referência estrutural para o
+% /apply (veja 06-cover-letter-templates.md) e o smoke test de CI do cover.cls:
+% precisa sempre compilar com xelatex em exatamente 1 página.
+% Demonstra o padrão correto de itemize: a lista fica FORA do \lettercontent{}
+% (cujo \\ final dá erro no \end{itemize}) e é envolvida em Raleway-Medium para
+% que a fonte dos bullets bata com a do corpo.
+%
+% Sem babel aqui, de propósito: cover.cls carrega xltxtra/xunicode, cujos
+% shorthands conflitam com os do babel-portuges, e o corpo inteiro é \raggedright
+% (sem justificação), então hifenização praticamente não influencia o resultado.
+% A única coisa que o babel traria é a data por extenso, resolvida abaixo.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[]{cover}
+\usepackage{fancyhdr}
+
+\pagestyle{fancy}
+\fancyhf{}
+
+\rfoot{Página \thepage \hspace{0pt}}
+\thispagestyle{empty}
+\renewcommand{\headrulewidth}{0pt}
+
+% Data por extenso em português, sem depender do babel.
+\newcommand{\dataporextenso}{%
+  \number\day\ de \ifcase\month\or janeiro\or fevereiro\or março\or abril\or
+  maio\or junho\or julho\or agosto\or setembro\or outubro\or novembro\or
+  dezembro\fi\ de \number\year}
+
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     NOME NO TÍTULO
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\namesection{}{\Huge{[YOUR NAME]}}{  \href{mailto:seu.email@exemplo.com}{seu.email@exemplo.com} | [+55 XX XXXXX-XXXX] |  \urlstyle{same}\href{https://www.linkedin.com/in/seuperfil}{LinkedIn}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     CONTEÚDO PRINCIPAL DA CARTA
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\currentdate{\dataporextenso}
+\lettercontent{Prezada equipe de recrutamento,}
+
+\lettercontent{[Parágrafo de abertura: cite a vaga e onde a encontrou, apresente sua conexão mais forte com ela em uma frase e antecipe por que você tem aderência. Mantenha em 2--3 frases.]}
+
+\lettercontent{[Parágrafo de desenvolvimento: sua experiência mais relevante, enquadrada nas atribuições do anúncio. Em seguida, 3--5 bullets concretos:]}
+
+{\raggedright\fontspec[Path = OpenFonts/fonts/raleway/]{Raleway-Medium}\fontsize{11pt}{13pt}\selectfont
+\begin{itemize}
+    \item \textbf{[Realização 1]:} [resultado concreto, com número sempre que possível]
+    \item \textbf{[Realização 2]:} [competência ou projeto ligado a um requisito do anúncio]
+    \item \textbf{[Realização 3]:} [evidência para um requisito desejável]
+\end{itemize}\par}
+\vspace{6pt}
+
+\lettercontent{[Parágrafo de conexão: por que esta empresa especificamente. Cite algo verificado: um produto, uma prioridade declarada, um time. Nunca genérico.]}
+
+\lettercontent{[Parágrafo de aderência pessoal: pontos fortes comportamentais e o que você agrega ao time, 2--3 frases.]}
+
+\lettercontent{Fico à disposição para conversarmos.}
+
+\begin{flushright}
+% Atenção: sem \\ ao final dentro do \closing{} - o cover.cls acrescenta o dele,
+% e uma quebra duplicada dispara "There's no line here to end."
+\closing{Atenciosamente,}
+
+\signature{[YOUR NAME]}
+\end{flushright}
+\end{document}
