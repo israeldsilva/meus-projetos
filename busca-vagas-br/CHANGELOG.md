@@ -4,12 +4,52 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-Releases are vetted checkpoints of `master`. If you maintain a personalized fork,
-prefer updating to a tagged release over pulling raw `master` (see
-[SETUP.md, section 8](SETUP.md#8-pulling-upstream-updates-into-your-fork)). The
-`framework_version` markers on methodology files tell you which of your customized
-files a release touched; `python3 tools/check_upstream_updates.py` lists them with
-per-file diff commands.
+Everything below `## Adaptação brasileira` is the history of the upstream
+template, [MadsLorentzen/ai-job-search](https://github.com/MadsLorentzen/ai-job-search),
+kept as-is for provenance. This is a vendored copy rather than a git fork, so its
+own history starts here and the automated upstream-sync tooling was removed; see
+[SETUP.md, section 8](SETUP.md#8-repository-privacy-and-pulling-upstream-improvements)
+for how to compare against upstream by hand.
+
+## Adaptação brasileira
+
+### Added
+
+- **Portal `gupy-search`** (`.agents/skills/gupy-search/`) - CLI para a API pública
+  da Gupy, o ATS por trás de boa parte das vagas publicadas no Brasil. Emite dois
+  campos além do contrato padrão de portal: `workplaceType` e `disabilities` (vaga
+  afirmativa PCD). Ships **desligado** (`enabled: false`): o mapeamento de campos
+  foi derivado da forma documentada da API, não capturado de resposta ao vivo, e
+  registrar parser não verificado é justamente o que o `/add-portal` proíbe. O
+  código falha alto quando a forma não bate, em vez de emitir linhas de `null`.
+- **Portão de Contrato e Modalidade** (`04-job-evaluation.md`) - veto antes de
+  pontuar para regime de contratação (CLT/PJ) e modalidade, os dois eixos que
+  decidem uma busca no Brasil. Regime silencioso vira "não verificado", nunca CLT
+  presumido.
+- **`PORTAIS-BR.md`** - fila de portais brasileiros com o reconhecimento inicial
+  feito, para o `/add-portal` começar com vantagem.
+- **Convenções brasileiras de currículo** (`CLAUDE.md`, `05-cv-templates.md`) - sem
+  foto, sem CPF/RG, endereço até cidade/UF, pretensão fora do CV; e verificação de
+  que os acentos sobrevivem na camada de texto do PDF, que é o modo de falha mais
+  provável de um CV brasileiro e invisível na página renderizada.
+
+### Changed
+
+- Perfil, README, queries de busca e templates LaTeX reescritos em português, com
+  `babel` brazil no currículo e data por extenso na carta.
+- `salary_lookup.py` passa a casar nomes de empresa brasileiros (LTDA, S.A., "do
+  Brasil", acentos) no lugar dos sufixos dinamarqueses; testes convertidos junto.
+- Aviso de privacidade do onboarding retargetado: a exposição aqui é a
+  visibilidade do repositório do próprio usuário, não o fork público forçado do
+  template original. O risco é o mesmo e o guard continua fixado por teste.
+
+### Removed
+
+- Portais dinamarqueses (`jobindex`, `jobnet`, `jobbank`, `jobdanmark`, `freehire`)
+  e suas entradas no allowlist de permissões.
+- Tooling de sincronização com upstream (`check_upstream_updates.py`,
+  `upstream_triage.py`, workflow `upstream-watch`): compara histórico git, que numa
+  cópia vendorizada é independente do original.
 
 ## [Unreleased]
 

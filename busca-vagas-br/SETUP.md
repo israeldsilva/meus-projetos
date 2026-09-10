@@ -26,7 +26,7 @@ On Windows, `py --version` is often the most reliable check. If your system expo
 
 ### Bun (for job search tools)
 
-The job portal CLIs (four Danish portals plus the country-agnostic `linkedin-search` and `freehire-search` tools) are written in TypeScript and run with Bun.
+The job portal CLIs (`linkedin-search`, which is country-agnostic, and `gupy-search` for the Brazilian market) are written in TypeScript and run with Bun.
 
 - macOS/Linux:
 
@@ -153,39 +153,59 @@ The default extractor is **pypdf** (BSD, `pip install pypdf`). Poppler `pdftotex
 
 If a command still uses `pdftotext -layout`, it must pass `-enc UTF-8` as well. If **neither** extractor is available, `/apply` skips the mechanical check with a warning and falls back to a visual keyword review — everything else works normally.
 
-## 2. Fork and clone
+## 2. Get the project and check where it publishes to
+
+This project is a **vendored copy**, not a git fork: it lives in the
+`busca-vagas-br/` subdirectory of a repository you own, and its history is
+independent of the upstream template.
 
 ```bash
-gh repo fork MadsLorentzen/ai-job-search --clone
-cd ai-job-search
-gh repo set-default <your-github-username>/ai-job-search
+git clone <your-repo-url>
+cd <your-repo>/busca-vagas-br
 ```
 
-Or manually: fork on GitHub, then clone your fork.
+Every command in this guide runs from `busca-vagas-br/`, not from the repository
+root — that is where `.claude/` and `CLAUDE.md` live.
 
-> **The `set-default` line is not optional.** `gh repo fork --clone` sets the
-> **upstream** repo as gh's default repository ("The `upstream` remote will be set as
-> the default remote repository" — `gh repo fork --help`), and gh uses the default for
-> **creating issues and PRs**. Without it, any later `gh issue create` run from this
-> clone — by you or by an agent you have asked to track your applications — silently
-> files on the upstream **public** tracker, publishing whatever the issue contains
-> under your GitHub identity, on a repo where you cannot delete it (#389).
-
-> **Before you go further: forks are public.** GitHub cannot make a fork of a public
-> repository private, and `/setup` (section 6) writes your personal data into **tracked**
-> files — pushing those commits to a fork publishes them. If this copy is for your own
-> job search rather than for contributing, prefer a **private repository** with this repo
-> as `upstream`: see section 8, step 1 for the exact commands and why committing your
-> personalization there is still the right move. Everything else in this guide works
-> identically either way.
+> **Before you go further: check whether your repository is public.** `/setup`
+> (section 4) writes your **personal data** into **tracked** files — `CLAUDE.md`
+> and the profile skill files — and pushing those commits publishes them to
+> anyone who can see the repository. This is the same exposure a **public** fork
+> of the upstream template would create, and it applies here whenever the
+> repository you vendored into is public.
+>
+> Check before you run `/setup`:
+>
+> ```bash
+> git remote get-url origin
+> gh repo view --json visibility -q .visibility   # PUBLIC or PRIVATE
+> ```
+>
+> If it reports `PUBLIC`, decide now rather than after the data is on disk:
+> move this project to a **private** repository, or commit your personalization
+> locally without pushing. Section 8 has the full reasoning and the exact
+> commands. The genuinely sensitive files — the tracker, salary data,
+> `documents/`, the application archive — are gitignored and never enter git
+> either way; it is `CLAUDE.md` and the profile skills that carry the risk.
+>
+> `/setup` runs this same check itself before writing anything, but knowing the
+> answer up front is what lets you choose the repository, and that choice is
+> much cheaper to make now.
 
 ## 3. Install job search CLI dependencies
-Run these from the repository root.
+Run these from `busca-vagas-br/`.
+
+- Bash / zsh / Git Bash:
+```bash
+for tool in gupy-search linkedin-search; do
+  (cd .agents/skills/$tool/cli && bun install)
+done
+```
 
 - PowerShell:
 
 ```powershell
-$tools = @("jobbank-search", "jobdanmark-search", "jobindex-search", "jobnet-search", "linkedin-search", "freehire-search")
+$tools = @("gupy-search", "linkedin-search")
 foreach ($tool in $tools) {
   Push-Location ".agents/skills/$tool/cli"
   bun install
@@ -193,16 +213,31 @@ foreach ($tool in $tools) {
 }
 ```
 
-- Bash / zsh / Git Bash:
+Both installs are optional: the CLIs have zero runtime dependencies and run with
+plain `bun`; `bun install` only pulls TypeScript dev types, which you need for
+`bun run typecheck` and nothing else.
+
+### Verify gupy-search before enabling it
+
+`gupy-search` ships **disabled** (`enabled: false` in its `SKILL.md`), so
+`/scrape` skips it. Its field mapping was written from the documented API shape
+rather than captured from a live response, and registering an unverified parser
+is exactly what `/add-portal` forbids. Confirm it yourself first:
+
 ```bash
-for tool in jobbank-search jobdanmark-search jobindex-search jobnet-search linkedin-search freehire-search; do
-  (cd .agents/skills/$tool/cli && bun install)
-done
+bun run .agents/skills/gupy-search/cli/src/cli.ts search -q "analista de dados" --limit 5 --format table
 ```
 
-For `linkedin-search` and `freehire-search` the install is optional: both have zero runtime dependencies and run with plain `bun`; `bun install` only pulls TypeScript dev types.
+A table with titles, companies and dates filled in means the mapping is right —
+flip `enabled: true` and you are done. An error naming a field means that field
+moved; `.agents/skills/gupy-search/url-reference.md` says which function to fix.
+The CLI is deliberately built to fail loudly here rather than return rows of
+nulls, because a silently degraded portal is far harder to notice.
 
-If you're outside Denmark, you can generate an equivalent search skill for your local job board with `/add-portal` — it scaffolds the same CLI structure for any public portal and test-runs a live query before registering. See the "Job search tools" section in the README.
+To add another Brazilian portal, run `/add-portal` — it scaffolds this same CLI
+structure for any public portal, checks robots.txt and terms first, and
+test-runs a live query before registering. `PORTAIS-BR.md` has the queue of
+candidates with the initial reconnaissance already written down.
 
 ## 4. Run the setup interview
 
@@ -269,7 +304,7 @@ This creates `salary_data.json` which the `/apply` workflow uses for salary benc
 Find a job posting you're interested in, then:
 
 ```
-/apply https://jobindex.dk/job/1234567
+/apply https://empresa.gupy.io/job/abc123
 ```
 
 Or paste the job description directly:
@@ -303,31 +338,55 @@ Set-Location cover_letters; xelatex cover_<company>_<role>.tex; Set-Location ..
 
 These commands apply to the stock templates (moderncv CV, `cover.cls` cover letter). If you'd rather use your own LaTeX template, run `/add-template` — it captures the template's compile engine, fonts, style rules, and page limit, test-compiles it, and wires it into `/apply`. See the "LaTeX templates" section in the README.
 
-## 8. Pulling upstream updates into your fork
+## 8. Repository privacy, and pulling upstream improvements
 
-Upstream keeps improving the methodology files your fork has personalized, so plan for updates from day one:
+### Where your personalization lands
 
-**Prefer releases over raw `master`.** Tagged [releases](../../releases) are vetted checkpoints, each described in [CHANGELOG.md](CHANGELOG.md). Updating to a tag pulls a stable, documented state instead of whatever `master` happens to be mid-review. Fetch tags with `git fetch upstream --tags` and merge a release (for example `git merge v1.0.0`) when you want stability; pull `master` directly only when you specifically want the latest unreleased changes. The steps below apply either way - substitute the release tag for `upstream/master` where you see it.
+`/setup` edits `CLAUDE.md` and the profile skill files in place. Those edits are
+*yours*, and committing them is reasonable — it is what makes the working tree
+recoverable. What matters is **where those commits go**.
 
-1. **Commit your personalization - but know where those commits land.** `/setup` edits CLAUDE.md and the profile skill files in place; those edits are *yours*, and committing them is what lets updates merge cleanly. But a GitHub **fork of this repo is public** - forks of public repositories cannot be made private - so anything you commit *and push to a fork* is visible to anyone. If you want your profile in a remote at all, don't push it to a fork: create a **private** repository, push there, and add this repo as the `upstream` remote (`git remote add upstream https://github.com/MadsLorentzen/ai-job-search.git`) to keep receiving updates. Committing locally without pushing is also fine. The genuinely sensitive files (tracker, salary data, `documents/`, application archives) are gitignored and never enter git either way. An uncommitted working tree is the most common reason `git pull` refuses to merge at all (`Your local changes ... would be overwritten`).
-2. **Preview what changed before pulling:**
-   ```bash
-   git remote add upstream https://github.com/MadsLorentzen/ai-job-search.git   # first time only, if you cloned your own fork
-   git fetch upstream    # or origin, if you cloned the template directly
-   python3 tools/check_upstream_updates.py
-   ```
-   It compares the `framework_version` markers in your framework files against upstream and lists exactly which methodology files changed, with the diff command for each.
+- **A public repository publishes them.** Anything committed *and pushed* to a
+  public repository is visible to anyone, permanently, including in the history
+  after you delete it. `CLAUDE.md` holds your name, contact details, employment
+  history and whatever else you told `/setup`.
+- **Prefer a private repository** if this copy is for your own job search. Move
+  the project there, or keep the commits local and never push.
+- **Committing locally without pushing is also fine.** An uncommitted working
+  tree is the most common reason a later `git pull` refuses to merge at all
+  (`Your local changes ... would be overwritten`), so committing has real value
+  even if nothing is ever pushed.
+- The genuinely sensitive files — `job_search_tracker.csv`, `salary_data.json`,
+  everything under `documents/`, the generated CVs and cover letters, the
+  `/interview` prep packs — are gitignored and never enter git either way.
 
-   Two tools answer two different questions, and it's worth running both:
-   - **`check_upstream_updates.py`** — *which of my personalized files changed?* It reads the `framework_version` stamp on each methodology file, so it flags exactly the customized files a release touched.
-   - **`upstream_triage.py`** — *which upstream commits deserve my attention?* It walks the commits you're behind and sorts them into "worth reviewing" vs "probably skip", dropping anything you've already cherry-picked (matched by `git patch-id`, so ported work falls off with no bookkeeping), commits that only touch files your fork removed, and SHAs you've listed in `.github/upstream-wontport.txt`. It's report-only — it prints ready-to-run `git cherry-pick` lines but never merges, pushes, or opens a PR, because on a fork "applies cleanly" isn't "correct".
+Read the Privacidade section inside `CLAUDE.md` before committing: it lists what
+should never be written into that file at all (CPF, RG, full address, anything
+covered by the LGPD as sensitive personal data).
 
-     ```bash
-     python3 tools/upstream_triage.py --remote upstream
-     ```
+### Pulling improvements from the upstream template
 
-     Forks also inherit a `.github/workflows/upstream-watch.yml` that runs this weekly and writes the result into a single rolling issue (it no-ops on the upstream template itself, and stays disabled on a fork until you enable Actions).
-3. **Merge normally.** `git merge upstream/master` (or `git pull`) three-way-merges upstream's edits around your personalization; because methodology edits rarely touch the lines `/setup` filled in, most updates land cleanly. A conflict in a personalized file is a *feature*, not a failure — it means upstream changed methodology in a section you customized, and the version marker plus its changelog commit tell you why. Resolve by keeping your data and adopting the methodology change around it.
+This is a vendored copy, so there is no `upstream` remote to merge from and no
+automated sync — the tools that did that in the original template were removed
+because they compare git history, and this repository's history is unrelated to
+the template's.
+
+To see what changed upstream, clone it somewhere else and diff the directories:
+
+```bash
+git clone https://github.com/MadsLorentzen/ai-job-search.git /tmp/ai-job-search
+diff -ru /tmp/ai-job-search/.claude .claude | less
+```
+
+Port anything worth porting by hand. Two things to keep in mind while doing it:
+
+1. **A file this project deliberately changed is not a file that fell behind.**
+   The market adaptations — the Contract & Modality Gate, the Brazilian CV
+   conventions, the portal list — are intentional divergence, and re-syncing them
+   from upstream would undo the point of this copy. `README.md`'s "O que foi
+   adaptado" is the list of what is deliberately different.
+2. **Upstream's Danish portal skills do not apply here.** They were removed on
+   purpose; a diff will show them as missing every time.
 
 ## Troubleshooting
 

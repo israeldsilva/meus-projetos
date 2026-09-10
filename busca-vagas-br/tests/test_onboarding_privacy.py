@@ -29,33 +29,54 @@ def section(text: str, heading: str) -> str:
     return match.group(1) if match else ""
 
 
-class TestForkWarningsAtTheDecisionPoint(unittest.TestCase):
+class TestVisibilityWarningsAtTheDecisionPoint(unittest.TestCase):
+    """This copy is vendored into a repo the user owns rather than forked, so
+    the exposure is the owner's repository visibility instead of a fork's
+    forced-public one. The risk is identical - /setup writes personal data into
+    tracked files - so the warning must still sit at the point of decision, in
+    both onboarding paths, next to the command that reveals the answer."""
+
     def assert_warns(self, body: str, where: str):
         self.assertRegex(
             body,
             re.compile(r"public", re.IGNORECASE),
-            f"{where}'s fork section must say the fork will be public",
-        )
-        self.assertIn(
-            "personal data",
-            body,
-            f"{where}'s fork section must say /setup writes personal data into tracked files",
+            f"{where}'s onboarding section must say a public repository publishes the data",
         )
         self.assertRegex(
             body,
-            re.compile(r"section 8|§8|#8-pulling", re.IGNORECASE),
-            f"{where}'s fork section must point at SETUP.md section 8's private-remote recipe",
+            re.compile(r"personal data|dados pessoais", re.IGNORECASE),
+            f"{where}'s onboarding section must say /setup writes personal data into tracked files",
+        )
+        self.assertRegex(
+            body,
+            re.compile(r"section 8|seção 8|§8", re.IGNORECASE),
+            f"{where}'s onboarding section must point at SETUP.md section 8's private-repo recipe",
+        )
+        self.assertIn(
+            "gh repo view",
+            body,
+            f"{where} must give the visibility check itself, not just tell the reader to worry",
         )
 
-    def test_readme_quick_start_warns_next_to_the_fork_command(self):
-        body = section(README.read_text(encoding="utf-8"), "### 1. Fork and clone")
-        self.assertIn("gh repo fork", body, "sanity: the fork command lives in this section")
+    def test_readme_quick_start_warns_before_setup_runs(self):
+        body = section(README.read_text(encoding="utf-8"), "## Começando")
+        self.assertIn("/setup", body, "sanity: onboarding runs /setup in this section")
         self.assert_warns(body, "README")
 
-    def test_setup_guide_warns_next_to_the_fork_command(self):
-        body = section(SETUP_GUIDE.read_text(encoding="utf-8"), "## 2. Fork and clone")
-        self.assertIn("gh repo fork", body, "sanity: the fork command lives in this section")
+    def test_setup_guide_warns_where_the_project_is_obtained(self):
+        body = section(
+            SETUP_GUIDE.read_text(encoding="utf-8"),
+            "## 2. Get the project and check where it publishes to",
+        )
         self.assert_warns(body, "SETUP.md")
+
+    def test_no_onboarding_path_still_tells_the_user_to_fork(self):
+        # The upstream flow forked a public template; this copy is vendored, so
+        # a stray `gh repo fork` here would send the reader somewhere that
+        # cannot receive their personalization at all.
+        for path, label in ((README, "README"), (SETUP_GUIDE, "SETUP.md")):
+            with self.subTest(doc=label):
+                self.assertNotIn("gh repo fork", path.read_text(encoding="utf-8"))
 
 
 class TestSetupChecksOriginBeforeWriting(unittest.TestCase):
