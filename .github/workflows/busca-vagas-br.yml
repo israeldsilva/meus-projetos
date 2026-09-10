@@ -1,0 +1,168 @@
+# CI do busca-vagas-br: lint de skills/comandos, guardas de segurança,
+# testes Python, compilação LaTeX dos exemplos e checagem dos CLIs de portal.
+#
+# O projeto vive em busca-vagas-br/, então todo passo roda com working-directory
+# apontado para lá e o workflow só dispara quando algo daquela pasta muda.
+#
+# Deliberadamente FORA daqui: testes ao vivo contra portais de vaga. Eles batem
+# em sites reais (instáveis em rede, e a skill linkedin-search é de uso pessoal
+# por ToS - requisições automatizadas em CI violariam isso). O CI roda apenas
+# typecheck e as suítes de fixture/mock versionadas; teste ao vivo de portal
+# continua sendo um passo local e sob demanda.
+#
+# Actions fixadas por SHA; token somente leitura.
+
+name: busca-vagas-br
+
+on:
+  push:
+    branches: [main]
+    paths: ["busca-vagas-br/**", ".github/workflows/busca-vagas-br.yml"]
+  pull_request:
+    paths: ["busca-vagas-br/**", ".github/workflows/busca-vagas-br.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: busca-vagas-br
+
+jobs:
+  lint:
+    name: Lint de skills, comandos e settings
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml
+      - run: python tools/lint_skills.py
+
+  security-guards:
+    name: Guardas de segurança (permissões, gitignore, manifests)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.12"
+      - run: python tools/security_guards.py
+
+  python-tests:
+    name: Testes Python (${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: python -m unittest discover -s tests -t . -v
+
+  latex-smoke:
+    # Duas pernas. texlive/texlive:latest acompanha o TeX Live atual
+    # (moderncv 2.5+); debian:bookworm compila no TeX Live 2022 empacotado no
+    # apt, com moderncv 2.3.1 - as duas pontas da faixa de moderncv que os
+    # usuários realmente têm instalada.
+    name: Compilar CV e carta de exemplo (${{ matrix.leg.name }})
+    runs-on: ubuntu-latest
+    container: ${{ matrix.leg.container }}
+    strategy:
+      fail-fast: false
+      matrix:
+        leg:
+          - name: texlive-latest
+            container: texlive/texlive:latest
+          - name: debian-bookworm
+            container: debian:bookworm
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - name: Instalar TeX Live via apt (perna bookworm)
+        if: matrix.leg.name == 'debian-bookworm'
+        # --no-install-recommends deixa a perna enxuta, então os dois pacotes de
+        # fonte precisam ser nomeados: moderncv carrega fontawesome5 (o lualatex
+        # morre sem ele, vem em texlive-fonts-extra) e o driver xetex do hyperref
+        # busca as métricas pzdr em texlive-fonts-recommended.
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            texlive-luatex texlive-latex-extra texlive-xetex \
+            texlive-fonts-extra texlive-fonts-recommended \
+            poppler-utils python3
+      - name: Instalar ferramentas de inspeção de PDF
+        run: |
+          if ! command -v pdfinfo >/dev/null || ! command -v pdftotext >/dev/null; then
+            apt-get update
+            apt-get install -y --no-install-recommends poppler-utils
+          fi
+      - name: Compilar CV de exemplo (lualatex)
+        run: |
+          cd cv
+          lualatex -interaction=nonstopmode -halt-on-error main_exemplo.tex
+          test -f main_exemplo.pdf
+          if grep -q '^!' main_exemplo.log; then
+            echo '::error::lualatex reportou erros ao compilar cv/main_exemplo.tex'
+            grep -A3 '^!' main_exemplo.log
+            exit 1
+          fi
+      - name: Compilar carta de exemplo (xelatex)
+        run: |
+          cd cover_letters
+          xelatex -interaction=nonstopmode -halt-on-error carta_exemplo.tex
+          test -f carta_exemplo.pdf
+          if grep -q '^!' carta_exemplo.log; then
+            echo '::error::xelatex reportou erros ao compilar cover_letters/carta_exemplo.tex'
+            grep -A3 '^!' carta_exemplo.log
+            exit 1
+          fi
+      - name: Verificar camada de texto extraível
+        run: |
+          python3 tools/verify_pdf.py cv/main_exemplo.pdf --min-chars 100
+          python3 tools/verify_pdf.py cover_letters/carta_exemplo.pdf --min-chars 100
+
+  discover-clis:
+    # A matriz é descoberta, não fixa, para que um CLI de portal adicionado via
+    # /add-portal seja typechecado e testado sem editar este workflow.
+    name: Descobrir CLIs de portal
+    runs-on: ubuntu-latest
+    outputs:
+      tools: ${{ steps.list.outputs.tools }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - id: list
+        run: |
+          tools=$(find .agents/skills -mindepth 3 -maxdepth 3 -path '*/cli/package.json' \
+            | cut -d/ -f3 | sort | jq -R . | jq -cs .)
+          echo "CLIs encontrados: $tools"
+          echo "tools=$tools" >> "$GITHUB_OUTPUT"
+
+  cli-checks:
+    name: Checagem do CLI ${{ matrix.tool }}
+    needs: discover-clis
+    if: needs.discover-clis.outputs.tools != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        tool: ${{ fromJSON(needs.discover-clis.outputs.tools) }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+      - run: bun install
+        working-directory: busca-vagas-br/.agents/skills/${{ matrix.tool }}/cli
+      - run: bun run typecheck
+        working-directory: busca-vagas-br/.agents/skills/${{ matrix.tool }}/cli
+      - name: Rodar testes de fixture/mock quando existirem
+        run: |
+          if find tests -type f -name '*.test.ts' | grep -q .; then
+            bun test
+          else
+            echo "Sem testes Bun para ${{ matrix.tool }}; pulando"
+          fi
+        working-directory: busca-vagas-br/.agents/skills/${{ matrix.tool }}/cli
